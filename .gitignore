@@ -1,0 +1,29 @@
+# Node modules
+node_modules/
+
+# Next.js build output
+.next/
+out/
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS files
+.DS_Store
+
+# Local env — los secretos NUNCA se suben a git
+.env
+.env.local
+.env*.local
+
+# Local data (transacciones Payphone)
+data/
+
+# Ayudante de desarrollo solo para Windows (no aplica en el servidor Linux)
+reset-dev.ps1
+server-run.log
