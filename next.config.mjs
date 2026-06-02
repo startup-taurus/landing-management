@@ -54,12 +54,6 @@ const securityHeaders = [
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=()",
   },
-  // HSTS: activar solo cuando el sitio esté servido por HTTPS en producción.
-  // Añadir `; preload` únicamente si se enviará el dominio a la lista HSTS preload.
-  {
-    key: "Strict-Transport-Security",
-    value: "max-age=63072000; includeSubDomains",
-  },
 ];
 
 const nextConfig = {
