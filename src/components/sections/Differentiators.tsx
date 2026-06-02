@@ -51,7 +51,7 @@ const rowEnter = {
 export default function Differentiators() {
   return (
     <section id="diferenciadores" className="relative py-24 sm:py-32 overflow-hidden">
-      <div className="relative max-w-7xl mx-auto px-6 grid lg:grid-cols-[0.85fr_1.15fr] gap-12 lg:gap-16">
+      <div className="relative max-w-7xl 2xl:max-w-[1500px] mx-auto px-6 sm:px-8 2xl:px-12 grid lg:grid-cols-[0.85fr_1.15fr] gap-12 lg:gap-16 2xl:gap-24">
         {/* Intro (sticky en desktop) */}
         <div className="lg:sticky lg:top-28 lg:self-start">
           <motion.div

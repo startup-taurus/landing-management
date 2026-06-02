@@ -1,14 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from "react";
-import {
-  PLAN_AMOUNT_TOTAL,
-  PLAN_AMOUNT_WITH_TAX,
-  PLAN_AMOUNT_WITHOUT_TAX,
-  PLAN_TAX,
-  PLAN_CURRENCY,
-  PLAN_REFERENCE,
-} from "@/lib/payphone";
+import { PLAN_CURRENCY, PLAN_REFERENCE } from "@/lib/payphone";
 
 declare global {
   interface Window {
@@ -72,10 +65,25 @@ interface Props {
   clientTransactionId: string;
   email: string;
   phone: string;
+  amount: number;
+  amountWithTax: number;
+  amountWithoutTax: number;
+  tax: number;
+  reference?: string;
   onError?: (msg: string) => void;
 }
 
-export default function PayphoneBox({ clientTransactionId, email, phone, onError }: Props) {
+export default function PayphoneBox({
+  clientTransactionId,
+  email,
+  phone,
+  amount,
+  amountWithTax,
+  amountWithoutTax,
+  tax,
+  reference,
+  onError,
+}: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const renderedFor = useRef<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -121,15 +129,15 @@ export default function PayphoneBox({ clientTransactionId, email, phone, onError
       new window.PPaymentButtonBox({
         token,
         clientTransactionId,
-        amount: PLAN_AMOUNT_TOTAL,
-        amountWithTax: PLAN_AMOUNT_WITH_TAX,
-        amountWithoutTax: PLAN_AMOUNT_WITHOUT_TAX,
-        tax: PLAN_TAX,
+        amount,
+        amountWithTax,
+        amountWithoutTax,
+        tax,
         service: 0,
         tip: 0,
         currency: PLAN_CURRENCY,
         storeId,
-        reference: PLAN_REFERENCE,
+        reference: reference || PLAN_REFERENCE,
         responseUrl,
         cancellationUrl: responseUrl,
         email,
@@ -143,7 +151,18 @@ export default function PayphoneBox({ clientTransactionId, email, phone, onError
     } catch (err) {
       onError?.((err as Error).message || "No se pudo abrir la pasarela");
     }
-  }, [ready, clientTransactionId, email, phone, onError]);
+  }, [
+    ready,
+    clientTransactionId,
+    email,
+    phone,
+    amount,
+    amountWithTax,
+    amountWithoutTax,
+    tax,
+    reference,
+    onError,
+  ]);
 
   return (
     <div className="w-full">

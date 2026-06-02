@@ -9,25 +9,69 @@ export const PAYPHONE_API_BASE = "https://pay.payphonetodoesposible.com";
 export const PAYPHONE_CONFIRM_URL = `${PAYPHONE_API_BASE}/api/button/V2/Confirm`;
 
 // ─────────────────────────────────────────────────────────────────────────────
-// MONTOS DEL PLAN  ·  PLACEHOLDERS  ·  TODO
+// MONTOS POR PLAN  ·  centavos USD
 // -----------------------------------------------------------------------------
-// Los planes y precios todavía NO están definidos. Estos valores están en 0 a
-// propósito. Cuando tengas el precio real (en CENTAVOS USD) y la app creada en
-// Payphone, completa estos números y cambia NEXT_PUBLIC_PAYMENTS_ENABLED="true".
-//
 // Reglas de Payphone (centavos USD):
 //   amount = amountWithTax + amountWithoutTax + tax + service + tip
-//   tax SOLO aplica sobre amountWithTax. IVA Ecuador (2024+) = 15%.
-// Ejemplo para un plan de $30 con IVA 15%:
-//   amountWithTax = 2609 ; tax = 391 ; amountWithoutTax = 0 ; total = 3000
+//   El IVA (tax) aplica sobre amountWithTax. IVA Ecuador (2024+) = 15%.
+//
+// Cada plan se cobra según el periodo elegido (mensual = 1 mes; anual = total año).
+// Los montos son lo que PAGA el cliente, en centavos.
 // ─────────────────────────────────────────────────────────────────────────────
-export const PLAN_AMOUNT_TOTAL = 0; // TODO: total en centavos (ej. 3000)
-export const PLAN_AMOUNT_WITH_TAX = 0; // TODO: base gravada en centavos
-export const PLAN_AMOUNT_WITHOUT_TAX = 0; // TODO: base no gravada en centavos
-export const PLAN_TAX = 0; // TODO: IVA en centavos
 export const PLAN_CURRENCY = "USD";
-export const PLAN_LABEL = "Flujora — Plan";
-export const PLAN_REFERENCE = "Flujora - Suscripción";
+export const PLAN_LABEL = "Flujora — Plan"; // fallback de etiqueta (emails)
+export const PLAN_REFERENCE = "Flujora - Suscripción"; // referencia base (fallback)
+
+// IVA Ecuador. Si los precios mostrados YA incluyen IVA, deja PRICES_INCLUDE_TAX=true.
+// Si fueran "+ IVA", ponlo en false (se suma el IVA sobre el precio mostrado).
+// Si el servicio no grava IVA, pon TAX_RATE = 0.
+export const TAX_RATE = 0.15;
+export const PRICES_INCLUDE_TAX = true;
+
+export type Billing = "monthly" | "annual";
+
+// Catálogo de planes cobrables — montos en CENTAVOS USD (lo que paga el cliente).
+//   Equipo Base: $99.90/mes · $958.80/año
+//   Equipo Pro:  $199.80/mes · $1,917.60/año
+// (Enterprise es "cotización": NO se cobra en línea.)
+export const PLAN_CATALOG: Record<string, { label: string; monthly: number; annual: number }> = {
+  base: { label: "Equipo Base", monthly: 9990, annual: 95880 },
+  pro: { label: "Equipo Pro", monthly: 19980, annual: 191760 },
+};
+
+export interface AmountBreakdown {
+  amount: number;
+  amountWithTax: number;
+  amountWithoutTax: number;
+  tax: number;
+}
+
+export function getPlanTotalCents(planId: string, billing: Billing): number | null {
+  const p = PLAN_CATALOG[planId];
+  if (!p) return null;
+  return billing === "annual" ? p.annual : p.monthly;
+}
+
+export function getPlanLabel(planId: string, billing: Billing): string {
+  const p = PLAN_CATALOG[planId];
+  if (!p) return PLAN_LABEL;
+  return `Flujora — ${p.label} · ${billing === "annual" ? "anual" : "mensual"}`;
+}
+
+// Desglosa el total (centavos) en los campos que pide Payphone:
+//   amount = amountWithTax + amountWithoutTax + tax
+export function computeAmounts(totalCents: number): AmountBreakdown {
+  if (TAX_RATE <= 0) {
+    return { amount: totalCents, amountWithTax: 0, amountWithoutTax: totalCents, tax: 0 };
+  }
+  if (PRICES_INCLUDE_TAX) {
+    const base = Math.round(totalCents / (1 + TAX_RATE));
+    const tax = totalCents - base;
+    return { amount: totalCents, amountWithTax: base, amountWithoutTax: 0, tax };
+  }
+  const tax = Math.round(totalCents * TAX_RATE);
+  return { amount: totalCents + tax, amountWithTax: totalCents, amountWithoutTax: 0, tax };
+}
 
 export interface LeadInput {
   name: string;
@@ -41,6 +85,11 @@ export interface StoredTransaction {
   createdAt: string;
   confirmedAt?: string;
   lead: LeadInput;
+  // Plan/monto esperado (para validar el cobro en la confirmación).
+  planId?: string;
+  billing?: Billing;
+  planLabel?: string;
+  amount?: number; // total esperado en centavos
   payphoneTransactionId?: number;
   authorizationCode?: string;
   cardBrand?: string;

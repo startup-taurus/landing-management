@@ -166,7 +166,7 @@ export default function ModuleShowcase() {
 
   return (
     <section id="vistas" className="relative py-24 sm:py-32 overflow-hidden">
-      <div className="relative max-w-6xl mx-auto px-6">
+      <div className="relative max-w-6xl 2xl:max-w-[1320px] mx-auto px-6 sm:px-8 2xl:px-12">
         <div className="max-w-2xl mb-12 sm:mb-16">
           <motion.div
             variants={fadeInUp}

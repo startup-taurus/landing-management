@@ -97,7 +97,7 @@ export default function HowItWorks() {
 
   return (
     <section id="como-funciona" className="relative py-24 sm:py-32 overflow-hidden">
-      <div className="relative max-w-6xl mx-auto px-6">
+      <div className="relative max-w-6xl 2xl:max-w-[1320px] mx-auto px-6 sm:px-8 2xl:px-12">
         <div className="max-w-2xl mb-14 sm:mb-20">
           <motion.div
             variants={fadeInUp}

@@ -89,7 +89,7 @@ export async function sendCustomerReceipt(tx: StoredTransaction): Promise<void> 
     <p>¡Hola ${escapeHtml(tx.lead.name)}! Recibimos tu pago correctamente.</p>
     <p>En las próximas <strong>24 horas hábiles</strong> te enviaremos tus credenciales de acceso y los pasos para empezar a usar Flujora.</p>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-top:1px solid #26304A">
-      ${row("Plan", PLAN_LABEL)}
+      ${row("Plan", tx.planLabel || PLAN_LABEL)}
       ${row("Referencia", tx.clientTransactionId)}
       ${tx.authorizationCode ? row("Autorización", tx.authorizationCode) : ""}
       ${tx.cardBrand && tx.lastDigits ? row("Tarjeta", `${tx.cardBrand} ···· ${tx.lastDigits}`) : ""}

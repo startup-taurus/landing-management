@@ -47,7 +47,7 @@ const COLUMNS: {
 
 function AppMockup() {
   return (
-    <div className="relative w-full max-w-xl mx-auto">
+    <div className="relative w-full mx-auto">
       <div className="relative rounded-2xl border border-[#26304A]/80 shadow-[0_50px_120px_-25px_rgba(0,0,0,0.8),0_0_0_1px_rgba(16,185,129,0.07)] overflow-hidden bg-[#0A0F1E]/95 backdrop-blur-sm">
         {/* Top bar */}
         <div className="bg-[#131B2E] border-b border-[#26304A] px-4 py-2.5 flex items-center gap-3">
@@ -257,7 +257,7 @@ function HeroVisual({ scrollY }: { scrollY: MotionValue<number> }) {
 
   if (reduce) {
     return (
-      <div className="relative mx-auto w-full max-w-xl">
+      <div className="relative mx-auto w-full max-w-xl 2xl:max-w-2xl">
         <AppMockup />
       </div>
     );
@@ -269,7 +269,7 @@ function HeroVisual({ scrollY }: { scrollY: MotionValue<number> }) {
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
       style={{ y: visualY }}
-      className="relative mx-auto w-full max-w-xl [perspective:1200px]"
+      className="relative mx-auto w-full max-w-xl 2xl:max-w-2xl [perspective:1200px]"
     >
       {/* Haz de luz detrás del mockup (capa profunda) */}
       <motion.div
@@ -336,7 +336,7 @@ export default function Hero() {
 
       <motion.div
         style={{ opacity: heroFade }}
-        className="relative max-w-7xl mx-auto px-6 py-16 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center w-full"
+        className="relative max-w-7xl 2xl:max-w-[1500px] mx-auto px-6 sm:px-8 2xl:px-12 py-16 lg:py-20 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 2xl:gap-24 items-center w-full"
       >
         <motion.div
           variants={staggerHero}
@@ -355,10 +355,10 @@ export default function Hero() {
             className="font-display text-white leading-[1.02]"
             lineClassName="font-semibold"
             lines={[
-              <span key="l1" style={{ fontSize: "clamp(40px, 6vw, 80px)" }}>
+              <span key="l1" style={{ fontSize: "clamp(40px, 6vw, 96px)" }}>
                 Organiza el trabajo
               </span>,
-              <span key="l2" style={{ fontSize: "clamp(40px, 6vw, 80px)" }}>
+              <span key="l2" style={{ fontSize: "clamp(40px, 6vw, 96px)" }}>
                 de tu equipo con{" "}
                 <span className="display-italic text-aurora">claridad</span>.
               </span>,

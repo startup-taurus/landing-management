@@ -14,7 +14,6 @@ import {
   Cpu,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
-import MagneticButton from "@/components/ui/MagneticButton";
 import KineticHeading from "@/components/ui/KineticHeading";
 import PayphoneBox from "@/components/payphone/PayphoneBox";
 import { WHATSAPP_URL } from "@/lib/contact";
@@ -128,6 +127,11 @@ interface InitResult {
   clientTransactionId: string;
   phone: string;
   email: string;
+  amount: number;
+  amountWithTax: number;
+  amountWithoutTax: number;
+  tax: number;
+  reference: string;
 }
 
 export default function Pricing() {
@@ -136,7 +140,7 @@ export default function Pricing() {
 
   return (
     <section id="planes" className="relative py-24 sm:py-32 overflow-hidden">
-      <div className="relative max-w-6xl mx-auto px-6">
+      <div className="relative max-w-6xl 2xl:max-w-[1320px] mx-auto px-6 sm:px-8 2xl:px-12">
         <div className="text-center max-w-2xl mx-auto mb-10">
           <motion.div
             variants={fadeInUp}
@@ -263,7 +267,7 @@ function PlanCard({ tier, billing, onChoose }: { tier: Tier; billing: Billing; o
   return (
     <motion.div
       variants={fadeInUp}
-      className={`group relative rounded-card p-7 flex flex-col h-full overflow-hidden transition-colors duration-300 ${
+      className={`group relative rounded-card p-7 flex flex-col h-full transition-colors duration-300 ${
         featured
           ? "border border-[#10B981]/40 bg-[#131B2E]/85 shadow-[0_30px_80px_-30px_rgba(16,185,129,0.5)]"
           : "border border-[#26304A] bg-[#131B2E]/55 hover:border-[#10B981]/30"
@@ -359,13 +363,17 @@ function PlanCTA({ tier, onChoose, featured }: { tier: Tier; onChoose: () => voi
 
   // Planes de pago con la pasarela ACTIVA → checkout.
   if (PAYMENTS_ENABLED) {
-    const inner = (
-      <Button variant={featured ? "primary" : "outline"} className="w-full justify-center" onClick={onChoose} data-cursor="cta">
+    return (
+      <Button
+        variant={featured ? "primary" : "outline"}
+        className="w-full justify-center"
+        onClick={onChoose}
+        data-cursor="cta"
+      >
         {tier.cta}
         <ArrowRight className="w-4 h-4" />
       </Button>
     );
-    return featured ? <MagneticButton onClick={onChoose} className="w-full">{inner}</MagneticButton> : inner;
   }
 
   // Pasarela DESACTIVADA → captar lead por contacto / WhatsApp.
@@ -411,16 +419,27 @@ function CheckoutCard({ tier, billing, onBack }: { tier: Tier; billing: Billing;
       const res = await fetch("/api/payphone/init", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, planId: tier.id, billing }),
       });
       const data = (await res.json()) as Partial<InitResult> & { error?: string };
-      if (!res.ok || !data.clientTransactionId || !data.phone || !data.email) {
+      if (
+        !res.ok ||
+        !data.clientTransactionId ||
+        !data.phone ||
+        !data.email ||
+        typeof data.amount !== "number"
+      ) {
         throw new Error(data.error || "No pudimos iniciar el pago.");
       }
       setInitData({
         clientTransactionId: data.clientTransactionId,
         phone: data.phone,
         email: data.email,
+        amount: data.amount,
+        amountWithTax: data.amountWithTax ?? 0,
+        amountWithoutTax: data.amountWithoutTax ?? 0,
+        tax: data.tax ?? 0,
+        reference: data.reference ?? "",
       });
       setStage("pay");
     } catch (err) {
@@ -463,9 +482,7 @@ function CheckoutCard({ tier, billing, onBack }: { tier: Tier; billing: Billing;
 
           {stage === "pay" && initData && (
             <PayStage
-              clientTransactionId={initData.clientTransactionId}
-              email={initData.email}
-              phone={initData.phone}
+              init={initData}
               onError={(msg) => {
                 setErrorMsg(msg);
                 setStage("error");
@@ -664,15 +681,11 @@ function FormStage({
 }
 
 function PayStage({
-  clientTransactionId,
-  email,
-  phone,
+  init,
   onError,
   onBack,
 }: {
-  clientTransactionId: string;
-  email: string;
-  phone: string;
+  init: InitResult;
   onError: (m: string) => void;
   onBack: () => void;
 }) {
@@ -693,9 +706,14 @@ function PayStage({
 
       <div className="rounded-xl border border-[#26304A] bg-[#0E1525]/60 p-4 sm:p-5 mb-4">
         <PayphoneBox
-          clientTransactionId={clientTransactionId}
-          email={email}
-          phone={phone}
+          clientTransactionId={init.clientTransactionId}
+          email={init.email}
+          phone={init.phone}
+          amount={init.amount}
+          amountWithTax={init.amountWithTax}
+          amountWithoutTax={init.amountWithoutTax}
+          tax={init.tax}
+          reference={init.reference}
           onError={onError}
         />
       </div>
@@ -705,7 +723,7 @@ function PayStage({
           <Lock className="w-3 h-3" /> Conexión cifrada extremo a extremo
         </span>
         <span className="font-mono text-[10px] text-[#A6B0C9]/45">
-          Ref: {clientTransactionId.slice(4, 22)}
+          Ref: {init.clientTransactionId.slice(4, 22)}
         </span>
       </div>
     </div>

@@ -60,8 +60,8 @@ export default function Contact() {
 
   return (
     <section id="contacto" className="relative py-24 sm:py-32 overflow-hidden">
-      <div className="relative max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+      <div className="relative max-w-7xl 2xl:max-w-[1400px] mx-auto px-6 sm:px-8 2xl:px-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <motion.div
             variants={fadeInLeft}
             initial="hidden"

@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import {
   generateClientTransactionId,
   normalizeEcuadorPhone,
+  getPlanTotalCents,
+  getPlanLabel,
+  computeAmounts,
+  type Billing,
   type LeadInput,
 } from "@/lib/payphone";
 import { saveTransaction } from "@/lib/transactions";
@@ -29,9 +33,9 @@ export async function POST(req: Request) {
     );
   }
 
-  let body: Partial<LeadInput>;
+  let body: Partial<LeadInput> & { planId?: string; billing?: string };
   try {
-    body = (await req.json()) as Partial<LeadInput>;
+    body = (await req.json()) as Partial<LeadInput> & { planId?: string; billing?: string };
   } catch {
     return NextResponse.json({ error: "JSON inválido" }, { status: 400 });
   }
@@ -40,6 +44,8 @@ export async function POST(req: Request) {
   const email = (body.email || "").toString().trim().toLowerCase();
   const phoneRaw = (body.phone || "").toString().trim();
   const phone = normalizeEcuadorPhone(phoneRaw);
+  const planId = (body.planId || "").toString().trim();
+  const billing: Billing = body.billing === "annual" ? "annual" : "monthly";
 
   if (name.length < 2 || name.length > 80) {
     return NextResponse.json({ error: "Nombre inválido" }, { status: 400 });
@@ -53,6 +59,14 @@ export async function POST(req: Request) {
       { status: 400 }
     );
   }
+
+  // Monto del plan: la fuente de verdad vive en el servidor (no se confía en el cliente).
+  const totalCents = getPlanTotalCents(planId, billing);
+  if (totalCents === null || totalCents <= 0) {
+    return NextResponse.json({ error: "Plan inválido" }, { status: 400 });
+  }
+  const amounts = computeAmounts(totalCents);
+  const planLabel = getPlanLabel(planId, billing);
 
   let clientTransactionId: string;
   try {
@@ -68,10 +82,23 @@ export async function POST(req: Request) {
       status: "pending",
       createdAt: new Date().toISOString(),
       lead: { name, email, phone },
+      planId,
+      billing,
+      planLabel,
+      amount: amounts.amount,
     });
   } catch (err) {
     console.error("[payphone/init] error guardando lead:", (err as Error).message);
   }
 
-  return NextResponse.json({ clientTransactionId, phone, email });
+  return NextResponse.json({
+    clientTransactionId,
+    phone,
+    email,
+    reference: planLabel,
+    amount: amounts.amount,
+    amountWithTax: amounts.amountWithTax,
+    amountWithoutTax: amounts.amountWithoutTax,
+    tax: amounts.tax,
+  });
 }

@@ -26,7 +26,7 @@ const heroEnter = {
 export default function Features() {
   return (
     <section id="caracteristicas" className="relative py-24 sm:py-32 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl 2xl:max-w-[1500px] mx-auto px-6 sm:px-8 2xl:px-12">
         <div className="mb-14 sm:mb-20 max-w-3xl">
           <motion.div
             variants={fadeInUp}

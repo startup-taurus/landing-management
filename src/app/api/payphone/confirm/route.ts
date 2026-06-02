@@ -4,7 +4,6 @@ import {
   isApproved,
   sanitizeForClient,
   verifyClientTransactionId,
-  PLAN_AMOUNT_TOTAL,
 } from "@/lib/payphone";
 import { getTransaction, saveTransaction } from "@/lib/transactions";
 import { sendCustomerReceipt, sendInternalNotification } from "@/lib/email";
@@ -74,16 +73,18 @@ export async function POST(req: Request) {
   }
 
   // Verificación de estado + monto. payphoneResponse.amount es la fuente confiable
-  // del monto cobrado (confirmación server-to-server autenticada). Rechazamos
-  // cualquier cobro que no sea exactamente el del plan para cerrar manipulaciones.
+  // del monto cobrado (confirmación server-to-server autenticada). Lo comparamos
+  // contra el monto que guardamos al iniciar el plan, para cerrar manipulaciones.
+  const expectedAmount = stored?.amount;
   const statusApproved = isApproved(payphoneResponse);
-  const amountOk = Number(payphoneResponse.amount) === PLAN_AMOUNT_TOTAL;
+  const amountOk =
+    typeof expectedAmount === "number" && Number(payphoneResponse.amount) === expectedAmount;
   const approved = statusApproved && amountOk;
 
   if (statusApproved && !amountOk) {
     console.error(
       `[payphone/confirm] MONTO NO COINCIDE ref=${clientTransactionId} ` +
-        `esperado=${PLAN_AMOUNT_TOTAL} recibido=${payphoneResponse.amount} ` +
+        `esperado=${expectedAmount} recibido=${payphoneResponse.amount} ` +
         `ppTxId=${payphoneResponse.transactionId}`
     );
   }
