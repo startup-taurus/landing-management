@@ -37,7 +37,6 @@ const contentSecurityPolicy = [
   "base-uri 'self'",
   "object-src 'none'",
   "worker-src 'self' blob:",
-  "upgrade-insecure-requests",
 ].join("; ");
 
 const securityHeaders = [
