@@ -14,6 +14,8 @@ import Pricing from "@/components/sections/Pricing";
 import FAQ from "@/components/sections/FAQ";
 import Contact from "@/components/sections/Contact";
 import FloatingWhatsApp from "@/components/ui/FloatingWhatsApp";
+import PageAtmosphere from "@/components/ui/PageAtmosphere";
+import FlowThread from "@/components/ui/FlowThread";
 
 export default function Home() {
   useLenis();
@@ -25,19 +27,27 @@ export default function Home() {
 
   return (
     <>
-      <Navbar />
-      <main>
-        <Hero />
-        <Differentiators />
-        <Comparison />
-        <Features />
-        <ModuleShowcase />
-        <HowItWorks />
-        <Pricing />
-        <FAQ />
-        <Contact />
-      </main>
-      <Footer />
+      {/* Telón continuo (fijo) detrás de todo */}
+      <PageAtmosphere />
+
+      {/* Contenido sobre la atmósfera; el hilo de flujo recorre todo el alto */}
+      <div className="relative z-10">
+        <FlowThread />
+        <Navbar />
+        <main className="relative">
+          <Hero />
+          <Differentiators />
+          <Comparison />
+          <Features />
+          <ModuleShowcase />
+          <HowItWorks />
+          <Pricing />
+          <FAQ />
+          <Contact />
+        </main>
+        <Footer />
+      </div>
+
       <FloatingWhatsApp />
     </>
   );

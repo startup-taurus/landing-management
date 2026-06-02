@@ -7,80 +7,15 @@ import {
   useMotionValue,
   useSpring,
   useReducedMotion,
+  type MotionValue,
 } from "framer-motion";
 import { CheckCircle2, TrendingUp, ArrowRight, Sparkles } from "lucide-react";
 import { useRef, type ReactNode, type MouseEvent } from "react";
-import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import MagneticButton from "@/components/ui/MagneticButton";
-import AnimatedGradientBackground from "@/components/ui/AnimatedGradientBackground";
-import { fadeInUp, staggerHero, fadeInMockup } from "@/lib/animations";
-
-function FloatingCard({
-  children,
-  className,
-  delay,
-  from,
-  depth = 0,
-}: {
-  children: ReactNode;
-  className: string;
-  delay: number;
-  from: { x?: number; y?: number };
-  depth?: number;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: from.x ?? 0, y: from.y ?? 12, z: depth }}
-      animate={{ opacity: 1, x: 0, y: 0, z: depth }}
-      whileHover={{
-        z: depth + 40,
-        scale: 1.05,
-        transition: { type: "spring", stiffness: 300, damping: 20 },
-      }}
-      transition={{ delay, duration: 0.75, type: "spring", stiffness: 90, damping: 18 }}
-      style={{ transformStyle: "preserve-3d" }}
-      className={`absolute z-20 hidden xl:block ${className}`}
-    >
-      <div className="glass-liquid card-sheen rounded-2xl px-4 py-3">{children}</div>
-    </motion.div>
-  );
-}
-
-function FloatingStats() {
-  return (
-    <>
-      <FloatingCard className="-left-8 top-10" delay={0.5} from={{ x: -28 }} depth={55}>
-        <p className="text-[10px] font-inter text-[#A6B0C9]/65 uppercase tracking-widest mb-1.5">
-          Tareas completadas
-        </p>
-        <p className="text-2xl font-sora font-bold text-[#34D399]">248</p>
-        <div className="flex items-center gap-1.5 mt-1.5">
-          <TrendingUp className="w-3 h-3 text-[#34D399] shrink-0" />
-          <span className="text-xs font-inter text-[#34D399]">+18% esta semana</span>
-        </div>
-      </FloatingCard>
-
-      <FloatingCard className="-right-8 bottom-16" delay={0.7} from={{ x: 28 }} depth={80}>
-        <p className="text-[10px] font-inter text-[#A6B0C9]/65 uppercase tracking-widest mb-2">
-          Carga del equipo
-        </p>
-        <div className="flex items-center gap-2">
-          <div className="flex -space-x-2">
-            {["#10B981", "#8B5CF6", "#14B8A6", "#6366F1"].map((c, i) => (
-              <span
-                key={i}
-                className="w-6 h-6 rounded-full border-2 border-[#131B2E]"
-                style={{ background: c }}
-              />
-            ))}
-          </div>
-          <span className="text-xs font-inter text-[#A6B0C9]/80">+6 activos</span>
-        </div>
-      </FloatingCard>
-    </>
-  );
-}
+import KineticHeading from "@/components/ui/KineticHeading";
+import ReactiveDotField from "@/components/ui/ReactiveDotField";
+import { fadeInUp, staggerHero, focusIn, SPRING_SOFT, EASE_LUX } from "@/lib/animations";
 
 const COLUMNS: {
   title: string;
@@ -113,7 +48,7 @@ const COLUMNS: {
 function AppMockup() {
   return (
     <div className="relative w-full max-w-xl mx-auto">
-      <div className="relative rounded-2xl border border-[#26304A]/80 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.75),0_0_0_1px_rgba(16,185,129,0.06)] overflow-hidden bg-[#0A0F1E]">
+      <div className="relative rounded-2xl border border-[#26304A]/80 shadow-[0_50px_120px_-25px_rgba(0,0,0,0.8),0_0_0_1px_rgba(16,185,129,0.07)] overflow-hidden bg-[#0A0F1E]/95 backdrop-blur-sm">
         {/* Top bar */}
         <div className="bg-[#131B2E] border-b border-[#26304A] px-4 py-2.5 flex items-center gap-3">
           <div className="flex gap-1.5 shrink-0">
@@ -121,8 +56,8 @@ function AppMockup() {
             <div className="w-2.5 h-2.5 rounded-full bg-[#FFBD2E]" />
             <div className="w-2.5 h-2.5 rounded-full bg-[#27C93F]" />
           </div>
-          <div className="flex-1 bg-[#0A0F1E] rounded-md px-3 py-1 text-xs text-[#A6B0C9]/45 font-inter border border-[#26304A] truncate">
-            app.matriarca.app/tablero
+          <div className="flex-1 bg-[#0A0F1E] rounded-md px-3 py-1 text-xs text-[#A6B0C9]/45 font-mono border border-[#26304A] truncate">
+            app.flujora.com/tablero
           </div>
         </div>
 
@@ -139,9 +74,7 @@ function AppMockup() {
               <div
                 key={i}
                 className={`w-6 h-6 rounded-lg ${
-                  i === 0
-                    ? "bg-[#10B981]/20 border border-[#10B981]/35"
-                    : "bg-[#1A2336]/70"
+                  i === 0 ? "bg-[#10B981]/20 border border-[#10B981]/35" : "bg-[#1A2336]/70"
                 }`}
               />
             ))}
@@ -184,10 +117,7 @@ function AppMockup() {
                         <div className="flex items-center gap-1 mb-1.5">
                           <span
                             className="px-1.5 py-0.5 rounded text-[8px] font-inter font-semibold"
-                            style={{
-                              color: card.tagColor,
-                              background: `${card.tagColor}1f`,
-                            }}
+                            style={{ color: card.tagColor, background: `${card.tagColor}1f` }}
                           >
                             {card.tag}
                           </span>
@@ -228,20 +158,62 @@ function AppMockup() {
   );
 }
 
-// Escenario 3D del hero: el mockup y las tarjetas siguen al cursor (tilt + parallax).
-// Se desactiva si el usuario prefiere menos movimiento.
-function HeroVisual() {
+// Tarjeta flotante con parallax propio (capa cercana) + entrada.
+function FloatingCard({
+  children,
+  className,
+  delay,
+  px,
+  py,
+}: {
+  children: ReactNode;
+  className: string;
+  delay: number;
+  px: MotionValue<number>;
+  py: MotionValue<number>;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16, scale: 0.94 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ delay, duration: 0.7, ease: EASE_LUX }}
+      className={`absolute z-30 hidden xl:block ${className}`}
+    >
+      <motion.div style={{ x: px, y: py }} whileHover={{ scale: 1.05 }} className="cursor-grow">
+        <div className="glass-liquid card-sheen rounded-2xl px-4 py-3">{children}</div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+// Escenario con PROFUNDIDAD REAL: cada capa reacciona al puntero con distinta
+// magnitud (parallax) y el mockup además se inclina (tilt). Se desactiva con
+// prefers-reduced-motion.
+function HeroVisual({ scrollY }: { scrollY: MotionValue<number> }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
+
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 140, damping: 18, mass: 0.5 });
-  const sy = useSpring(my, { stiffness: 140, damping: 18, mass: 0.5 });
-  const rotateX = useTransform(sy, [-0.5, 0.5], [10, -10]);
-  const rotateY = useTransform(sx, [-0.5, 0.5], [-14, 14]);
+  const sx = useSpring(mx, SPRING_SOFT);
+  const sy = useSpring(my, SPRING_SOFT);
+
+  // Tilt del mockup
+  const rotateX = useTransform(sy, [-0.5, 0.5], [8, -8]);
+  const rotateY = useTransform(sx, [-0.5, 0.5], [-12, 12]);
+  // Capas: haz (profundo, poco), mockup (medio), tarjetas (cercano, mucho)
+  const beamX = useTransform(sx, [-0.5, 0.5], [22, -22]);
+  const beamY = useTransform(sy, [-0.5, 0.5], [16, -16]);
+  const mockX = useTransform(sx, [-0.5, 0.5], [-10, 10]);
+  const cardAX = useTransform(sx, [-0.5, 0.5], [-52, 52]);
+  const cardAY = useTransform(sy, [-0.5, 0.5], [-30, 30]);
+  const cardBX = useTransform(sx, [-0.5, 0.5], [46, -46]);
+  const cardBY = useTransform(sy, [-0.5, 0.5], [34, -34]);
+  // Parallax de scroll del conjunto (definido antes de cualquier early-return).
+  const visualY = useTransform(scrollY, [0, 1], [0, -70]);
 
   function handleMove(e: MouseEvent<HTMLDivElement>) {
-    if (!ref.current) return;
+    if (!ref.current || reduce) return;
     const r = ref.current.getBoundingClientRect();
     mx.set((e.clientX - r.left) / r.width - 0.5);
     my.set((e.clientY - r.top) / r.height - 0.5);
@@ -251,30 +223,88 @@ function HeroVisual() {
     my.set(0);
   }
 
+  const statsTop = (
+    <>
+      <p className="text-[10px] font-mono text-[#A6B0C9]/65 uppercase tracking-widest mb-1.5">
+        Tareas completadas
+      </p>
+      <p className="text-2xl font-display font-semibold text-[#34D399]">248</p>
+      <div className="flex items-center gap-1.5 mt-1.5">
+        <TrendingUp className="w-3 h-3 text-[#34D399] shrink-0" />
+        <span className="text-xs font-inter text-[#34D399]">+18% esta semana</span>
+      </div>
+    </>
+  );
+  const statsBottom = (
+    <>
+      <p className="text-[10px] font-mono text-[#A6B0C9]/65 uppercase tracking-widest mb-2">
+        Carga del equipo
+      </p>
+      <div className="flex items-center gap-2">
+        <div className="flex -space-x-2">
+          {["#10B981", "#8B5CF6", "#14B8A6", "#6366F1"].map((c, i) => (
+            <span
+              key={i}
+              className="w-6 h-6 rounded-full border-2 border-[#131B2E]"
+              style={{ background: c }}
+            />
+          ))}
+        </div>
+        <span className="text-xs font-inter text-[#A6B0C9]/80">+6 activos</span>
+      </div>
+    </>
+  );
+
   if (reduce) {
     return (
       <div className="relative mx-auto w-full max-w-xl">
         <AppMockup />
-        <FloatingStats />
       </div>
     );
   }
 
   return (
-    <div
+    <motion.div
       ref={ref}
       onMouseMove={handleMove}
       onMouseLeave={handleLeave}
-      className="mx-auto w-full max-w-xl [perspective:1100px]"
+      style={{ y: visualY }}
+      className="relative mx-auto w-full max-w-xl [perspective:1200px]"
     >
+      {/* Haz de luz detrás del mockup (capa profunda) */}
       <motion.div
-        style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+        aria-hidden
+        style={{ x: beamX, y: beamY }}
+        className="pointer-events-none absolute -inset-10 -z-10"
+      >
+        <div
+          className="absolute left-1/2 top-1/2 h-[120%] w-[80%] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[80px]"
+          style={{
+            background:
+              "radial-gradient(circle, rgba(16,185,129,0.28), rgba(139,92,246,0.16) 45%, transparent 70%)",
+          }}
+        />
+      </motion.div>
+
+      {/* Mockup (capa media, con tilt) */}
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={focusIn}
+        style={{ rotateX, rotateY, x: mockX, transformStyle: "preserve-3d" }}
         className="relative will-change-transform"
       >
         <AppMockup />
-        <FloatingStats />
       </motion.div>
-    </div>
+
+      {/* Tarjetas (capa cercana, mayor parallax) */}
+      <FloatingCard className="-left-8 top-10" delay={0.5} px={cardAX} py={cardAY}>
+        {statsTop}
+      </FloatingCard>
+      <FloatingCard className="-right-8 bottom-16" delay={0.7} px={cardBX} py={cardBY}>
+        {statsBottom}
+      </FloatingCard>
+    </motion.div>
   );
 }
 
@@ -284,17 +314,25 @@ export default function Hero() {
     target: sectionRef,
     offset: ["start start", "end start"],
   });
-  const mockupY = useTransform(scrollYProgress, [0, 1], [0, -80]);
-  const heroFade = useTransform(scrollYProgress, [0, 0.8], [1, 0.4]);
+  const heroFade = useTransform(scrollYProgress, [0, 0.85], [1, 0.45]);
 
   return (
     <section
       id="inicio"
       ref={sectionRef}
-      className="relative min-h-screen flex items-center pt-20 lg:pt-16 overflow-hidden bg-[#0A0F1E]"
+      className="relative min-h-screen flex items-center pt-24 lg:pt-20 overflow-hidden"
     >
-      <div aria-hidden className="absolute inset-0 bg-grid opacity-70" />
-      <AnimatedGradientBackground variant="hero" />
+      {/* Campo reactivo de puntos (la "reacción al usuario") */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-70"
+        style={{
+          maskImage: "radial-gradient(80% 70% at 50% 45%, #000 35%, transparent 80%)",
+          WebkitMaskImage: "radial-gradient(80% 70% at 50% 45%, #000 35%, transparent 80%)",
+        }}
+      >
+        <ReactiveDotField />
+      </div>
 
       <motion.div
         style={{ opacity: heroFade }}
@@ -304,51 +342,57 @@ export default function Hero() {
           variants={staggerHero}
           initial="hidden"
           animate="visible"
-          className="flex flex-col gap-6"
+          className="flex flex-col gap-7"
         >
-          <motion.div variants={fadeInUp}>
-            <Badge>
-              <Sparkles className="w-3.5 h-3.5" /> Gestión de proyectos, sin la complejidad
-            </Badge>
+          <motion.div variants={fadeInUp} className="flex items-center gap-3">
+            <span className="h-px w-9 bg-gradient-to-r from-[#34D399] to-transparent" />
+            <span className="eyebrow text-[#6EE7B7]">Gestión de proyectos · sin la complejidad</span>
           </motion.div>
 
-          <motion.h1
-            variants={fadeInUp}
-            className="font-sora font-extrabold text-white leading-[1.05] tracking-tight"
-            style={{ fontSize: "clamp(38px, 5.6vw, 68px)" }}
-          >
-            Organiza el trabajo de tu equipo con{" "}
-            <span className="text-aurora">claridad</span>.
-          </motion.h1>
+          <KineticHeading
+            as="h1"
+            immediate
+            className="font-display text-white leading-[1.02]"
+            lineClassName="font-semibold"
+            lines={[
+              <span key="l1" style={{ fontSize: "clamp(40px, 6vw, 80px)" }}>
+                Organiza el trabajo
+              </span>,
+              <span key="l2" style={{ fontSize: "clamp(40px, 6vw, 80px)" }}>
+                de tu equipo con{" "}
+                <span className="display-italic text-aurora">claridad</span>.
+              </span>,
+            ]}
+          />
 
           <motion.p
             variants={fadeInUp}
             className="font-inter text-[#A6B0C9] text-lg leading-relaxed max-w-xl"
           >
-            Tareas, tableros, calendario y cronograma en un solo lugar. Matriarca
-            reúne lo esencial para planificar, colaborar y entregar a tiempo — liviano,
-            en español y listo en minutos.
+            Tareas, tableros, calendario y cronograma en un solo lugar. Flujora reúne
+            lo esencial para planificar, colaborar y entregar a tiempo — liviano, en
+            español y listo en minutos.
           </motion.p>
 
-          <motion.div variants={fadeInUp} className="flex flex-wrap items-center gap-3 pt-2">
+          <motion.div variants={fadeInUp} className="flex flex-wrap items-center gap-3 pt-1">
             <MagneticButton href="#planes">
-              <Button size="lg">
-                Crear mi espacio
+              <Button size="lg" data-cursor="cta">
+                Ver planes
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </MagneticButton>
             <a href="#como-funciona">
-              <Button size="lg" variant="outline">
-                Ver cómo funciona
+              <Button size="lg" variant="outline" data-cursor="cta">
+                Cómo funciona
               </Button>
             </a>
           </motion.div>
 
           <motion.div
             variants={fadeInUp}
-            className="flex flex-wrap items-center gap-x-5 gap-y-2 pt-4"
+            className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-3"
           >
-            {["Listo en minutos", "Soporte en español", "Sin contratos"].map((item) => (
+            {["En español", "Listo en minutos", "Soporte humano"].map((item) => (
               <div
                 key={item}
                 className="flex items-center gap-2 text-sm font-inter text-[#A6B0C9]/80"
@@ -360,15 +404,9 @@ export default function Hero() {
           </motion.div>
         </motion.div>
 
-        <motion.div
-          variants={fadeInMockup}
-          initial="hidden"
-          animate="visible"
-          style={{ y: mockupY }}
-          className="will-change-transform"
-        >
-          <HeroVisual />
-        </motion.div>
+        <div className="will-change-transform">
+          <HeroVisual scrollY={scrollYProgress} />
+        </div>
       </motion.div>
     </section>
   );

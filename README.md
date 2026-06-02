@@ -1,6 +1,6 @@
-# Matriarca — Landing (Gestión de Proyectos)
+# Flujora — Landing (Gestión de Proyectos)
 
-Landing de **Matriarca**, un gestor de proyectos simple (estilo ClickUp pero más
+Landing de **Flujora**, un gestor de proyectos simple (estilo ClickUp pero más
 liviano): tareas, tableros, calendario y cronograma en un solo lugar.
 
 Construido con **Next.js 14 (App Router) + React 18 + TypeScript + Tailwind CSS**,
@@ -57,7 +57,7 @@ proyecto en otra máquina, recréalo con estas variables.
 | `PAYPHONE_TOKEN`                  | secreta  | Token de servidor para la confirmación server-to-server.             |
 | `PAYPHONE_HMAC_SECRET`            | secreta  | Secreto para firmar/verificar el `clientTransactionId` (mín. 16).    |
 | `RESEND_API_KEY`                  | secreta  | API key de Resend para emails. Si está vacío, los correos se omiten. |
-| `RESEND_FROM`                     | pública  | Remitente de los correos (ej. `Matriarca <no-reply@matriarca.app>`). |
+| `RESEND_FROM`                     | pública  | Remitente de los correos (ej. `Flujora <no-reply@flujora.com>`). |
 | `NOTIFY_EMAIL`                    | pública  | Destinatarios internos del aviso de venta (separados por coma).      |
 
 ---
@@ -116,7 +116,7 @@ src/
 
 ## Notas de marca
 
-- **Nombre:** Matriarca. **Contacto/WhatsApp** en
+- **Nombre:** Flujora. **Contacto/WhatsApp** en
   [`src/lib/contact.ts`](src/lib/contact.ts) son placeholders editables.
 - **Paleta:** tema oscuro, base esmeralda/teal + acento violeta. Tokens en
   [`tailwind.config.ts`](tailwind.config.ts) y variables CSS en

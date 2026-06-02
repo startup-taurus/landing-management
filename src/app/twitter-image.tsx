@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Matriarca — Gestión de proyectos simple para equipos";
+export const alt = "Flujora — Gestión de proyectos simple para equipos";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -73,7 +73,7 @@ export default function TwitterImage() {
         <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <Mark />
           <div style={{ fontSize: 44, fontWeight: 800, letterSpacing: -1, color: "#F4F6FB" }}>
-            Matriarca
+            Flujora
           </div>
         </div>
 
@@ -95,7 +95,7 @@ export default function TwitterImage() {
             proyectos simple, en español y liviana.
           </div>
           <div style={{ marginTop: 12, fontSize: 18, color: "#A6B0C9", letterSpacing: 0.5, display: "flex" }}>
-            matriarca.app  ·  Gestión de proyectos
+            flujora.com  ·  Gestión de proyectos
           </div>
         </div>
       </div>

@@ -78,6 +78,32 @@ export const popIn: Variants = {
   },
 };
 
+// ── Easing / springs reutilizables ──────────────────────────────────────────
+export const EASE_OUT = easeOut;
+// Curva "cara"/editorial: arranca rápido, asienta muy lento.
+export const EASE_LUX = [0.22, 1, 0.36, 1] as const;
+export const SPRING_SOFT = { stiffness: 120, damping: 26, mass: 0.6 } as const;
+export const SPRING_SNAPPY = { stiffness: 320, damping: 24, mass: 0.5 } as const;
+export const SPRING_FLOAT = { stiffness: 80, damping: 18, mass: 0.8 } as const;
+
+// ── Revelados editoriales (reemplazan al fadeInUp universal) ─────────────────
+// Máscara línea por línea: el texto sube desde detrás de un recorte.
+export const maskReveal: Variants = {
+  hidden: { y: "115%" },
+  visible: { y: "0%", transition: { duration: 0.9, ease: EASE_LUX } },
+};
+
+// Cortina por clip-path (de izquierda a derecha).
+export const clipReveal: Variants = {
+  hidden: { clipPath: "inset(0 100% 0 0)" },
+  visible: { clipPath: "inset(0 0% 0 0)", transition: { duration: 1.1, ease: EASE_LUX } },
+};
+
+export const staggerLines: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.09, delayChildren: 0.04 } },
+};
+
 export const staggerContainer: Variants = {
   hidden: {},
   visible: {

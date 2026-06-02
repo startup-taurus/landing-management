@@ -80,9 +80,10 @@ export default function Navbar() {
           <div className="px-4 sm:px-5 h-16 flex items-center justify-between gap-4">
             <motion.a
               href="#"
+              data-cursor="link"
               className="flex items-center gap-2.5 group shrink-0"
               whileHover={{ scale: 1.02 }}
-              aria-label="Matriarca — inicio"
+              aria-label="Flujora — inicio"
             >
               <Logo markClassName="h-9 w-9 sm:h-10 sm:w-10" />
             </motion.a>
@@ -94,6 +95,7 @@ export default function Navbar() {
                   <motion.a
                     key={link.href}
                     href={link.href}
+                    data-cursor="link"
                     initial="idle"
                     animate={isActive ? "active" : "idle"}
                     whileHover="hovered"
@@ -119,7 +121,7 @@ export default function Navbar() {
 
             <div className="hidden md:block">
               <MagneticButton href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer">
-                <Button size="sm">Solicitar demo</Button>
+                <Button size="sm" data-cursor="cta">Solicitar demo</Button>
               </MagneticButton>
             </div>
 
@@ -173,7 +175,7 @@ export default function Navbar() {
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.05 + i * 0.07 }}
-                    className="px-4 py-3 rounded-btn font-sora font-semibold text-white text-lg hover:bg-white/5 hover:text-[#34D399] transition-colors"
+                    className="px-4 py-3 rounded-btn font-display font-semibold text-white text-lg hover:bg-white/5 hover:text-[#34D399] transition-colors"
                   >
                     {link.label}
                   </motion.a>

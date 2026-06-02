@@ -10,58 +10,75 @@ import {
   AlertCircle,
   ArrowLeft,
   Sparkles,
-  Clock,
+  ArrowRight,
+  Cpu,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
+import MagneticButton from "@/components/ui/MagneticButton";
+import KineticHeading from "@/components/ui/KineticHeading";
 import PayphoneBox from "@/components/payphone/PayphoneBox";
 import { WHATSAPP_URL } from "@/lib/contact";
 import { fadeInUp, staggerCards, VIEWPORT_DEFAULT } from "@/lib/animations";
 
-// La pasarela está cableada pero DESACTIVADA hasta tener planes/credenciales.
+// La pasarela está cableada pero DESACTIVADA hasta tener credenciales.
 // (Esta constante se reemplaza en build con el valor de .env.)
 const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === "true";
+
+type Billing = "monthly" | "annual";
 
 interface Tier {
   id: string;
   name: string;
   tagline: string;
-  price: string; // placeholder editable
-  period: string;
+  users: string;
+  monthly: number | null; // USD/mes (null = cotización)
+  annual: number | null; // USD/mes equivalente facturando anual
+  annualBilled?: string; // texto del total anual
+  ai: string;
   features: string[];
   cta: string;
   highlight?: boolean;
   payable?: boolean;
+  custom?: boolean; // Enterprise → cotización
 }
 
-// TODO: precios PLACEHOLDER. Define los reales cuando tengas los planes.
 const TIERS: Tier[] = [
   {
-    id: "free",
-    name: "Free",
-    tagline: "Para empezar y proyectos personales",
-    price: "$0",
-    period: "siempre gratis",
+    id: "base",
+    name: "Equipo Base",
+    tagline: "Para equipos que arrancan con orden",
+    users: "Hasta 10 usuarios",
+    monthly: 99.9,
+    annual: 79.9,
+    annualBilled: "$958.80 facturado al año",
+    ai: "Sin créditos de IA",
     features: [
-      "Hasta 5 miembros",
+      "Proyectos ilimitados",
       "Tareas y subtareas ilimitadas",
-      "Vistas Lista y Tablero",
-      "1 espacio de trabajo",
+      "Vistas Lista, Tablero y Calendario",
+      "Hasta 10 usuarios",
+      "Dashboards básicos",
+      "Soporte en español",
     ],
-    cta: "Comenzar gratis",
-    payable: false,
+    cta: "Empezar con Base",
+    payable: true,
   },
   {
     id: "pro",
-    name: "Pro",
-    tagline: "Para equipos que quieren todo",
-    price: "Próximamente",
-    period: "por usuario / mes",
+    name: "Equipo Pro",
+    tagline: "Todo lo del equipo, ahora con IA",
+    users: "Hasta 20 usuarios",
+    monthly: 199.8,
+    annual: 159.8,
+    annualBilled: "$1,917.60 facturado al año",
+    ai: "5,000 créditos de IA / mes",
     features: [
-      "Todo lo de Free",
-      "Calendario y Cronograma (Gantt)",
+      "Todo lo de Base",
+      "Hasta 20 usuarios",
+      "Cronograma (Gantt) y dependencias",
       "Automatizaciones",
-      "Dashboards y reportes",
       "Seguimiento de tiempo",
+      "Permisos avanzados",
       "Soporte prioritario",
     ],
     cta: "Elegir Pro",
@@ -69,22 +86,34 @@ const TIERS: Tier[] = [
     payable: true,
   },
   {
-    id: "team",
-    name: "Equipo",
-    tagline: "Para organizaciones en crecimiento",
-    price: "Próximamente",
-    period: "por usuario / mes",
+    id: "enterprise",
+    name: "Enterprise",
+    tagline: "Para organizaciones a medida",
+    users: "Personalizado (30+)",
+    monthly: null,
+    annual: null,
+    ai: "Créditos de IA a medida",
     features: [
       "Todo lo de Pro",
-      "Permisos avanzados",
-      "Metas y objetivos",
-      "Espacios ilimitados",
-      "Onboarding asistido",
+      "Usuarios a medida (30+)",
+      "Créditos de IA ilimitados / a medida",
+      "SSO/SAML y seguridad avanzada",
+      "Onboarding y gerente de cuenta",
+      "SLA y soporte prioritario",
+      "Facturación personalizada",
     ],
-    cta: "Elegir Equipo",
-    payable: true,
+    cta: "Hablar con ventas",
+    payable: false,
+    custom: true,
   },
 ];
+
+function priceFor(tier: Tier, billing: Billing): number | null {
+  return billing === "monthly" ? tier.monthly : tier.annual;
+}
+function formatUSD(n: number): string {
+  return `$${n.toFixed(2)}`;
+}
 
 interface LeadForm {
   name: string;
@@ -102,53 +131,61 @@ interface InitResult {
 }
 
 export default function Pricing() {
+  const [billing, setBilling] = useState<Billing>("monthly");
   const [checkoutTier, setCheckoutTier] = useState<Tier | null>(null);
 
   return (
-    <section
-      id="planes"
-      className="relative py-24 sm:py-28 overflow-hidden"
-      style={{ background: "linear-gradient(180deg, #0A0F1E 0%, #0E1525 100%)" }}
-    >
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#10B981]/35 to-transparent"
-      />
-      <div
-        aria-hidden
-        className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[680px] h-[680px] rounded-full bg-[#8B5CF6]/6 blur-3xl pointer-events-none"
-      />
-
+    <section id="planes" className="relative py-24 sm:py-32 overflow-hidden">
       <div className="relative max-w-6xl mx-auto px-6">
-        <motion.div
-          variants={fadeInUp}
-          initial="hidden"
-          whileInView="visible"
-          viewport={VIEWPORT_DEFAULT}
-          className="text-center max-w-2xl mx-auto mb-12"
-        >
-          <span className="inline-block text-sm font-semibold tracking-widest uppercase text-[#34D399] mb-4">
-            Planes
-          </span>
-          <h2 className="font-sora font-bold text-white mb-4" style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}>
-            Precios simples, <span className="text-aurora">sin sorpresas</span>
-          </h2>
-          <p className="font-inter text-[#A6B0C9] text-lg leading-relaxed">
-            Empiezas gratis y creces cuando lo necesites. Sin permanencias.
-          </p>
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <motion.div
+            variants={fadeInUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={VIEWPORT_DEFAULT}
+            className="flex items-center justify-center gap-3 mb-5"
+          >
+            <span className="h-px w-9 bg-gradient-to-r from-transparent to-[#34D399]" />
+            <span className="eyebrow text-[#6EE7B7]">Planes</span>
+            <span className="h-px w-9 bg-gradient-to-l from-transparent to-[#34D399]" />
+          </motion.div>
+          <KineticHeading
+            as="h2"
+            className="font-display font-semibold text-white flex flex-col items-center"
+            lineClassName="text-center"
+            lines={[
+              <span key="l1" style={{ fontSize: "clamp(28px, 3.6vw, 46px)" }}>
+                Precios claros,
+              </span>,
+              <span key="l2" style={{ fontSize: "clamp(28px, 3.6vw, 46px)" }}>
+                <span className="display-italic text-aurora">sin sorpresas</span>.
+              </span>,
+            ]}
+          />
+          <motion.p
+            variants={fadeInUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={VIEWPORT_DEFAULT}
+            className="font-inter text-[#A6B0C9] text-lg leading-relaxed mt-5"
+          >
+            Elige el plan para tu equipo. Cambias o cancelas cuando quieras.
+          </motion.p>
+        </div>
 
-          {!PAYMENTS_ENABLED && (
-            <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#8B5CF6]/10 border border-[#8B5CF6]/30">
-              <Clock className="w-4 h-4 text-[#A78BFA]" />
-              <span className="font-inter text-sm text-[#C4B5FD]">
-                Estamos afinando los planes de pago — muy pronto podrás contratarlos en línea.
-              </span>
-            </div>
-          )}
-        </motion.div>
+        {/* Toggle mensual / anual */}
+        {!checkoutTier && (
+          <div className="flex justify-center mb-12">
+            <BillingToggle billing={billing} setBilling={setBilling} />
+          </div>
+        )}
 
         {checkoutTier && PAYMENTS_ENABLED ? (
-          <CheckoutCard tier={checkoutTier} onBack={() => setCheckoutTier(null)} />
+          <CheckoutCard
+            tier={checkoutTier}
+            billing={billing}
+            onBack={() => setCheckoutTier(null)}
+          />
         ) : (
           <motion.div
             variants={staggerCards}
@@ -161,25 +198,75 @@ export default function Pricing() {
               <PlanCard
                 key={tier.id}
                 tier={tier}
+                billing={billing}
                 onChoose={() => setCheckoutTier(tier)}
               />
             ))}
           </motion.div>
+        )}
+
+        {!PAYMENTS_ENABLED && (
+          <p className="text-center font-inter text-[13px] text-[#A6B0C9]/55 mt-8">
+            El pago en línea con tarjeta estará disponible muy pronto. Mientras tanto,{" "}
+            <a href="#contacto" className="text-[#34D399] hover:underline">
+              escríbenos para contratar hoy
+            </a>
+            .
+          </p>
         )}
       </div>
     </section>
   );
 }
 
-function PlanCard({ tier, onChoose }: { tier: Tier; onChoose: () => void }) {
+function BillingToggle({ billing, setBilling }: { billing: Billing; setBilling: (b: Billing) => void }) {
+  const opts: { id: Billing; label: string }[] = [
+    { id: "monthly", label: "Mensual" },
+    { id: "annual", label: "Anual" },
+  ];
+  return (
+    <div className="relative inline-flex items-center gap-1 p-1 rounded-full border border-[#26304A] bg-[#131B2E]/70 backdrop-blur-sm">
+      {opts.map((o) => {
+        const active = billing === o.id;
+        return (
+          <button
+            key={o.id}
+            type="button"
+            data-cursor="cta"
+            onClick={() => setBilling(o.id)}
+            className="relative px-5 py-2 rounded-full text-sm font-inter font-medium transition-colors"
+          >
+            {active && (
+              <motion.span
+                layoutId="billing-pill"
+                className="absolute inset-0 rounded-full bg-gradient-to-r from-[#10B981] to-[#0D9488] shadow-[0_8px_24px_-8px_rgba(16,185,129,0.6)]"
+                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+              />
+            )}
+            <span className={`relative z-10 ${active ? "text-white" : "text-[#A6B0C9]"}`}>
+              {o.label}
+            </span>
+          </button>
+        );
+      })}
+      <span className="ml-1 mr-2 inline-flex items-center px-2 py-0.5 rounded-full bg-[#8B5CF6]/15 border border-[#8B5CF6]/30 font-mono text-[10px] text-[#C4B5FD]">
+        −20%
+      </span>
+    </div>
+  );
+}
+
+function PlanCard({ tier, billing, onChoose }: { tier: Tier; billing: Billing; onChoose: () => void }) {
   const featured = !!tier.highlight;
+  const price = priceFor(tier, billing);
+
   return (
     <motion.div
       variants={fadeInUp}
-      className={`relative rounded-card p-7 flex flex-col h-full ${
+      className={`group relative rounded-card p-7 flex flex-col h-full overflow-hidden transition-colors duration-300 ${
         featured
-          ? "border border-[#10B981]/40 bg-[#131B2E] shadow-[0_30px_80px_-30px_rgba(16,185,129,0.5)]"
-          : "border border-[#26304A] bg-[#131B2E]/60"
+          ? "border border-[#10B981]/40 bg-[#131B2E]/85 shadow-[0_30px_80px_-30px_rgba(16,185,129,0.5)]"
+          : "border border-[#26304A] bg-[#131B2E]/55 hover:border-[#10B981]/30"
       }`}
     >
       {featured && (
@@ -196,25 +283,46 @@ function PlanCard({ tier, onChoose }: { tier: Tier; onChoose: () => void }) {
               maskComposite: "exclude",
             }}
           />
-          <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold font-inter text-white bg-gradient-to-r from-[#10B981] to-[#8B5CF6] shadow-[0_8px_20px_-8px_rgba(139,92,246,0.7)]">
+          <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 px-3 py-1 rounded-full text-[11px] font-semibold font-inter text-white bg-gradient-to-r from-[#10B981] to-[#8B5CF6] shadow-[0_8px_20px_-8px_rgba(139,92,246,0.7)] z-10">
             <Sparkles className="w-3 h-3" /> Recomendado
           </span>
         </>
       )}
 
       <div className="relative">
-        <h3 className="font-sora font-bold text-white text-xl mb-1">{tier.name}</h3>
-        <p className="font-inter text-sm text-[#A6B0C9]/75 mb-5 min-h-[40px]">{tier.tagline}</p>
+        <h3 className="font-display font-semibold text-white text-xl mb-1">{tier.name}</h3>
+        <p className="font-inter text-sm text-[#A6B0C9]/75 mb-1.5 min-h-[40px]">{tier.tagline}</p>
+        <p className="font-mono text-[11px] text-[#A6B0C9]/55 mb-5">{tier.users}</p>
 
-        <div className="flex items-baseline gap-1.5 mb-6">
-          <span
-            className={`font-sora font-bold ${
-              tier.price.startsWith("$") ? "text-white text-4xl" : "text-[#A78BFA] text-2xl"
-            }`}
-          >
-            {tier.price}
-          </span>
-          <span className="font-inter text-[12px] text-[#A6B0C9]/55">{tier.period}</span>
+        <div className="mb-2 min-h-[60px]">
+          {tier.custom || price === null ? (
+            <span className="font-display font-semibold text-white text-3xl">Cotización</span>
+          ) : (
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-mono font-semibold text-white text-4xl tracking-tight">
+                {formatUSD(price)}
+              </span>
+              <span className="font-inter text-[12px] text-[#A6B0C9]/55">/ mes</span>
+            </div>
+          )}
+          {!tier.custom && billing === "annual" && tier.annualBilled && (
+            <p className="font-inter text-[11px] text-[#34D399]/80 mt-1">{tier.annualBilled}</p>
+          )}
+          {!tier.custom && billing === "monthly" && (
+            <p className="font-inter text-[11px] text-[#A6B0C9]/45 mt-1">facturado mensual</p>
+          )}
+        </div>
+
+        {/* Línea de créditos IA */}
+        <div
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg mb-5 border ${
+            tier.ai.startsWith("Sin")
+              ? "border-[#26304A] bg-[#0E1525]/60 text-[#A6B0C9]/65"
+              : "border-[#8B5CF6]/25 bg-[#8B5CF6]/10 text-[#C4B5FD]"
+          }`}
+        >
+          <Cpu className="w-3.5 h-3.5 shrink-0" />
+          <span className="font-inter text-[12px] leading-tight">{tier.ai}</span>
         </div>
 
         <ul className="space-y-2.5 mb-7">
@@ -236,52 +344,46 @@ function PlanCard({ tier, onChoose }: { tier: Tier; onChoose: () => void }) {
   );
 }
 
-function PlanCTA({
-  tier,
-  onChoose,
-  featured,
-}: {
-  tier: Tier;
-  onChoose: () => void;
-  featured: boolean;
-}) {
-  // Plan gratuito → siempre disponible (lleva a contacto / WhatsApp).
-  if (!tier.payable) {
+function PlanCTA({ tier, onChoose, featured }: { tier: Tier; onChoose: () => void; featured: boolean }) {
+  // Enterprise → ventas (contacto).
+  if (tier.custom || !tier.payable) {
     return (
-      <a href="#contacto" className="block">
+      <a href="#contacto" className="block" data-cursor="cta">
         <Button variant={featured ? "primary" : "outline"} className="w-full justify-center">
           {tier.cta}
+          <ArrowRight className="w-4 h-4" />
         </Button>
       </a>
     );
   }
 
-  // Planes de pago con la pasarela ACTIVA.
+  // Planes de pago con la pasarela ACTIVA → checkout.
   if (PAYMENTS_ENABLED) {
-    return (
-      <Button
-        variant={featured ? "primary" : "outline"}
-        className="w-full justify-center"
-        onClick={onChoose}
-      >
+    const inner = (
+      <Button variant={featured ? "primary" : "outline"} className="w-full justify-center" onClick={onChoose} data-cursor="cta">
         {tier.cta}
+        <ArrowRight className="w-4 h-4" />
       </Button>
     );
+    return featured ? <MagneticButton onClick={onChoose} className="w-full">{inner}</MagneticButton> : inner;
   }
 
-  // Planes de pago con la pasarela DESACTIVADA → "Próximamente".
+  // Pasarela DESACTIVADA → captar lead por contacto / WhatsApp.
   return (
     <div>
-      <Button variant="outline" className="w-full justify-center opacity-60 cursor-not-allowed" disabled>
-        <Clock className="w-4 h-4" /> Próximamente
-      </Button>
+      <a href="#contacto" className="block" data-cursor="cta">
+        <Button variant={featured ? "primary" : "outline"} className="w-full justify-center">
+          Quiero este plan
+          <ArrowRight className="w-4 h-4" />
+        </Button>
+      </a>
       <a
         href={WHATSAPP_URL}
         target="_blank"
         rel="noopener noreferrer"
         className="block text-center font-inter text-[12px] text-[#A6B0C9]/70 hover:text-[#34D399] transition-colors mt-2.5"
       >
-        Avísame cuando esté disponible
+        o escríbenos por WhatsApp
       </a>
     </div>
   );
@@ -291,7 +393,7 @@ function PlanCTA({
 // Checkout (solo se monta cuando PAYMENTS_ENABLED === true).
 // Todo el cableado de Payphone está aquí, listo para activarse.
 // ─────────────────────────────────────────────────────────────────────────────
-function CheckoutCard({ tier, onBack }: { tier: Tier; onBack: () => void }) {
+function CheckoutCard({ tier, billing, onBack }: { tier: Tier; billing: Billing; onBack: () => void }) {
   const [form, setForm] = useState<LeadForm>(INITIAL);
   const [stage, setStage] = useState<Stage>("form");
   const [errorMsg, setErrorMsg] = useState<string>("");
@@ -347,7 +449,7 @@ function CheckoutCard({ tier, onBack }: { tier: Tier; onBack: () => void }) {
       <CheckoutHeader stage={stage} />
 
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.15fr] gap-0">
-        <OrderSummary tier={tier} onBack={onBack} />
+        <OrderSummary tier={tier} billing={billing} onBack={onBack} />
 
         <div className="p-7 sm:p-9 bg-[#0A0F1E]/40 border-t lg:border-t-0 lg:border-l border-[#26304A]">
           {stage === "form" && <FormStage form={form} update={update} onSubmit={handleSubmit} />}
@@ -396,8 +498,8 @@ function CheckoutHeader({ stage }: { stage: Stage }) {
           <ShieldCheck className="w-4 h-4 text-white" strokeWidth={2.2} />
         </div>
         <div className="leading-tight">
-          <div className="font-sora font-semibold text-white text-sm">Checkout seguro</div>
-          <div className="font-inter text-[11px] text-[#A6B0C9]/55">Cifrado SSL · Payphone EC</div>
+          <div className="font-display font-semibold text-white text-sm">Checkout seguro</div>
+          <div className="font-mono text-[11px] text-[#A6B0C9]/55">Cifrado SSL · Payphone EC</div>
         </div>
       </div>
 
@@ -434,7 +536,11 @@ function CheckoutHeader({ stage }: { stage: Stage }) {
   );
 }
 
-function OrderSummary({ tier, onBack }: { tier: Tier; onBack: () => void }) {
+function OrderSummary({ tier, billing, onBack }: { tier: Tier; billing: Billing; onBack: () => void }) {
+  const price = priceFor(tier, billing);
+  const priceLabel = tier.custom || price === null ? "Cotización" : `${formatUSD(price)} / mes`;
+  const periodLabel = billing === "annual" ? "facturación anual" : "facturación mensual";
+
   return (
     <div className="p-7 sm:p-9">
       <button
@@ -445,20 +551,20 @@ function OrderSummary({ tier, onBack }: { tier: Tier; onBack: () => void }) {
         <ArrowLeft className="w-3.5 h-3.5" /> Ver todos los planes
       </button>
 
-      <div className="text-[11px] font-inter font-semibold uppercase tracking-[0.18em] text-[#A6B0C9]/55 mb-4">
+      <div className="text-[11px] font-mono uppercase tracking-[0.18em] text-[#A6B0C9]/55 mb-4">
         Resumen de tu orden
       </div>
 
       <div className="flex items-start justify-between gap-4 pb-5 border-b border-[#26304A]">
         <div className="flex-1 min-w-0">
-          <div className="font-sora font-semibold text-white text-base mb-0.5">
-            Matriarca — Plan {tier.name}
+          <div className="font-display font-semibold text-white text-base mb-0.5">
+            Flujora — {tier.name}
           </div>
           <div className="font-inter text-sm text-[#A6B0C9]/70">{tier.tagline}</div>
         </div>
         <div className="text-right shrink-0">
-          <div className="font-sora font-bold text-white text-lg">{tier.price}</div>
-          <div className="font-inter text-[11px] text-[#A6B0C9]/55">{tier.period}</div>
+          <div className="font-mono font-semibold text-white text-lg">{priceLabel}</div>
+          <div className="font-inter text-[11px] text-[#A6B0C9]/55">{periodLabel}</div>
         </div>
       </div>
 
@@ -494,7 +600,7 @@ function CheckoutFooter() {
         {["VISA", "Mastercard", "Diners", "Discover"].map((c) => (
           <span
             key={c}
-            className="font-sora text-[10px] font-bold uppercase tracking-wider text-[#A6B0C9]/70 px-2 py-1 rounded border border-[#26304A] bg-[#0E1525]/80"
+            className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#A6B0C9]/70 px-2 py-1 rounded border border-[#26304A] bg-[#0E1525]/80"
           >
             {c}
           </span>
@@ -515,7 +621,7 @@ function FormStage({
 }) {
   return (
     <form onSubmit={onSubmit}>
-      <h3 className="font-sora font-semibold text-white text-lg mb-1">Información del titular</h3>
+      <h3 className="font-display font-semibold text-white text-lg mb-1">Información del titular</h3>
       <p className="font-inter text-[#A6B0C9]/65 text-sm mb-6">
         Usaremos estos datos para enviarte el comprobante y tus credenciales.
       </p>
@@ -580,7 +686,7 @@ function PayStage({
         <ArrowLeft className="w-3.5 h-3.5" /> Volver a editar mis datos
       </button>
 
-      <h3 className="font-sora font-semibold text-white text-lg mb-1">Método de pago</h3>
+      <h3 className="font-display font-semibold text-white text-lg mb-1">Método de pago</h3>
       <p className="font-inter text-[#A6B0C9]/65 text-sm mb-5">
         Completa los datos de tu tarjeta en la pasarela cifrada de Payphone.
       </p>
@@ -612,7 +718,7 @@ function ErrorStage({ message, onRetry }: { message: string; onRetry: () => void
       <div className="w-14 h-14 rounded-full bg-red-500/15 flex items-center justify-center mb-4 ring-1 ring-red-500/30">
         <AlertCircle className="w-7 h-7 text-red-400" />
       </div>
-      <h3 className="font-sora font-semibold text-white text-lg mb-2">No pudimos continuar</h3>
+      <h3 className="font-display font-semibold text-white text-lg mb-2">No pudimos continuar</h3>
       <p className="font-inter text-sm text-[#A6B0C9] mb-6 max-w-sm leading-relaxed">
         {message ||
           "Hubo un problema procesando tu solicitud. Inténtalo de nuevo en unos segundos."}
@@ -643,7 +749,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="block font-inter text-[12px] font-semibold uppercase tracking-wider text-[#A6B0C9]/75 mb-2">
+      <span className="block font-mono text-[12px] font-semibold uppercase tracking-wider text-[#A6B0C9]/75 mb-2">
         {label}
         {required && <span className="text-[#34D399]"> *</span>}
       </span>
@@ -680,7 +786,7 @@ function PhoneField({ value, onChange }: { value: string; onChange: (v: string) 
 
   return (
     <label className="block">
-      <span className="block font-inter text-[12px] font-semibold uppercase tracking-wider text-[#A6B0C9]/75 mb-2">
+      <span className="block font-mono text-[12px] font-semibold uppercase tracking-wider text-[#A6B0C9]/75 mb-2">
         Celular <span className="text-[#34D399]">*</span>
       </span>
       <div className="relative flex items-stretch rounded-lg border border-[#26304A] bg-[#0A0F1E]/80 focus-within:ring-2 focus-within:ring-[#10B981]/40 focus-within:border-[#10B981] transition-all overflow-hidden">

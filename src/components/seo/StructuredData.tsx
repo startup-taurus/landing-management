@@ -43,11 +43,14 @@ export default function StructuredData() {
       audienceType: "Equipos, empresas y profesionales que gestionan proyectos",
     },
     offers: {
-      "@type": "Offer",
+      "@type": "AggregateOffer",
       priceCurrency: "USD",
-      price: "0",
+      lowPrice: "79.90",
+      highPrice: "199.80",
+      offerCount: 3,
       availability: "https://schema.org/InStock",
-      description: "Plan Free disponible. Planes Pro y Equipo próximamente.",
+      description:
+        "Planes por equipo: Equipo Base desde $79.90/mes (anual), Equipo Pro con IA y Enterprise a medida.",
     },
     featureList: [
       "Tareas y subtareas con responsable, fecha y prioridad",

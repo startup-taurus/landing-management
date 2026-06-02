@@ -67,7 +67,7 @@ function PaymentResult() {
     return (
       <Card>
         <Loader2 className="w-12 h-12 text-[#34D399] animate-spin mx-auto mb-5" />
-        <h1 className="font-sora text-2xl font-bold text-white text-center mb-2">
+        <h1 className="font-display text-2xl font-bold text-white text-center mb-2">
           Verificando tu pago…
         </h1>
         <p className="font-inter text-[#A6B0C9] text-sm text-center">
@@ -84,11 +84,11 @@ function PaymentResult() {
         <div className="mx-auto mb-5 w-16 h-16 rounded-full bg-[#10B981]/15 flex items-center justify-center">
           <CheckCircle2 className="w-10 h-10 text-[#34D399]" />
         </div>
-        <h1 className="font-sora text-2xl font-bold text-white text-center mb-2">
+        <h1 className="font-display text-2xl font-bold text-white text-center mb-2">
           ¡Pago recibido!
         </h1>
         <p className="font-inter text-[#A6B0C9] text-center mb-6">
-          Gracias por confiar en Matriarca. En las próximas 24 horas hábiles te
+          Gracias por confiar en Flujora. En las próximas 24 horas hábiles te
           enviaremos tus credenciales y los pasos de acceso al correo registrado.
         </p>
 

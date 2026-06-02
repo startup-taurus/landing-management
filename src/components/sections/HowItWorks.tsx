@@ -1,9 +1,10 @@
 'use client';
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { FolderPlus, UserPlus, LayoutList, LineChart, type LucideIcon } from "lucide-react";
-import Reveal from "@/components/ui/Reveal";
-import { staggerCards, VIEWPORT_DEFAULT } from "@/lib/animations";
+import { useRef } from "react";
+import KineticHeading from "@/components/ui/KineticHeading";
+import { fadeInUp, VIEWPORT_DEFAULT } from "@/lib/animations";
 
 interface Step {
   icon: LucideIcon;
@@ -34,96 +35,118 @@ const STEPS: Step[] = [
   },
 ];
 
-const stepEnter = {
-  hidden: { opacity: 0, y: 28 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.16, 1, 0.3, 1] as const },
-  },
-};
+function StepNode({
+  step,
+  index,
+  progress,
+}: {
+  step: Step;
+  index: number;
+  progress: ReturnType<typeof useScroll>["scrollYProgress"];
+}) {
+  const Icon = step.icon;
+  // Cada nodo se "enciende" cuando el progreso del scroll pasa su umbral.
+  const threshold = index / STEPS.length;
+  const next = (index + 0.6) / STEPS.length;
+  const glow = useTransform(progress, [threshold, next], [0, 1]);
+  const ringColor = useTransform(progress, [threshold, next], ["#26304A", "#34D399"]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={VIEWPORT_DEFAULT}
+      transition={{ duration: 0.6, delay: index * 0.08 }}
+      className="relative flex lg:flex-col items-start gap-4 lg:gap-0"
+    >
+      <div className="relative shrink-0 lg:mb-6">
+        <motion.span
+          className="relative z-10 grid place-items-center w-14 h-14 rounded-2xl border-2 bg-[#0A0F1E]"
+          style={{ borderColor: ringColor }}
+        >
+          <Icon className="w-6 h-6 text-white" strokeWidth={1.7} />
+          <motion.span
+            aria-hidden
+            className="absolute inset-0 rounded-2xl"
+            style={{
+              opacity: glow,
+              boxShadow: "0 0 32px -4px rgba(16,185,129,0.7)",
+              background: "radial-gradient(circle, rgba(16,185,129,0.18), transparent 70%)",
+            }}
+          />
+        </motion.span>
+        <span className="absolute -top-2 -right-2 z-20 grid place-items-center w-6 h-6 rounded-full bg-[#0E1525] border border-[#26304A] font-mono text-[11px] font-semibold text-[#34D399]">
+          {index + 1}
+        </span>
+      </div>
+      <div className="lg:pr-4">
+        <h3 className="font-display font-semibold text-white text-lg mb-1.5">{step.title}</h3>
+        <p className="font-inter text-[#A6B0C9] text-sm leading-relaxed">{step.description}</p>
+      </div>
+    </motion.div>
+  );
+}
 
 export default function HowItWorks() {
-  return (
-    <section
-      id="como-funciona"
-      className="relative py-24 sm:py-28 overflow-hidden bg-[#0A0F1E]"
-    >
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#10B981]/35 to-transparent"
-      />
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start 70%", "end 60%"],
+  });
+  const lineScale = useTransform(scrollYProgress, [0, 1], [0, 1]);
 
+  return (
+    <section id="como-funciona" className="relative py-24 sm:py-32 overflow-hidden">
       <div className="relative max-w-6xl mx-auto px-6">
-        <div className="text-center max-w-2xl mx-auto mb-14 sm:mb-20">
-          <Reveal variant="up">
-            <span className="inline-block text-sm font-semibold tracking-widest uppercase text-[#34D399] mb-4">
-              Cómo funciona
-            </span>
-          </Reveal>
-          <Reveal variant="up" delay={0.05}>
-            <h2 className="font-sora font-bold text-white mb-4" style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}>
-              De cero a equipo organizado en{" "}
-              <span className="text-aurora">cuatro pasos</span>
-            </h2>
-          </Reveal>
-          <Reveal variant="up" delay={0.1}>
-            <p className="font-inter text-[#A6B0C9] text-lg leading-relaxed">
-              Sin instalaciones ni configuración técnica. Empiezas hoy mismo.
-            </p>
-          </Reveal>
+        <div className="max-w-2xl mb-14 sm:mb-20">
+          <motion.div
+            variants={fadeInUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={VIEWPORT_DEFAULT}
+            className="flex items-center gap-3 mb-5"
+          >
+            <span className="h-px w-9 bg-gradient-to-r from-[#34D399] to-transparent" />
+            <span className="eyebrow text-[#6EE7B7]">Cómo funciona</span>
+          </motion.div>
+          <KineticHeading
+            as="h2"
+            className="font-display font-semibold text-white"
+            lines={[
+              <span key="l1" style={{ fontSize: "clamp(28px, 3.6vw, 46px)" }}>
+                De cero a equipo organizado
+              </span>,
+              <span key="l2" style={{ fontSize: "clamp(28px, 3.6vw, 46px)" }}>
+                en <span className="display-italic text-aurora">cuatro pasos</span>.
+              </span>,
+            ]}
+          />
+          <motion.p
+            variants={fadeInUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={VIEWPORT_DEFAULT}
+            className="font-inter text-[#A6B0C9] text-lg leading-relaxed mt-5"
+          >
+            Sin instalaciones ni configuración técnica. Empiezas hoy mismo.
+          </motion.p>
         </div>
 
-        <div className="relative">
-          {/* Línea conectora que se "dibuja" al entrar en vista (desktop) */}
-          <div className="hidden lg:block absolute top-7 left-[12.5%] right-[12.5%] h-px">
+        <div ref={ref} className="relative">
+          {/* Línea conectora que se llena con el scroll (desktop) */}
+          <div className="hidden lg:block absolute top-7 left-[7%] right-[7%] h-px">
             <div className="absolute inset-0 bg-[#26304A]" />
             <motion.div
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true, margin: "-120px" }}
-              transition={{ duration: 1.4, ease: [0.16, 1, 0.3, 1] }}
-              style={{ originX: 0 }}
+              style={{ scaleX: lineScale, originX: 0 }}
               className="absolute inset-0 bg-gradient-to-r from-[#10B981] via-[#14B8A6] to-[#8B5CF6]"
             />
           </div>
 
-          <motion.div
-            variants={staggerCards}
-            initial="hidden"
-            whileInView="visible"
-            viewport={VIEWPORT_DEFAULT}
-            className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-6"
-          >
-            {STEPS.map((step, i) => {
-              const Icon = step.icon;
-              return (
-                <motion.div key={step.title} variants={stepEnter} className="relative text-center lg:text-left">
-                  <div className="flex lg:block items-center gap-4">
-                    <div className="relative shrink-0 mx-auto lg:mx-0">
-                      <span
-                        className="relative z-10 inline-flex w-14 h-14 items-center justify-center rounded-2xl text-white shadow-[0_10px_30px_-8px_rgba(16,185,129,0.6)]"
-                        style={{ background: "linear-gradient(135deg,#10B981,#14B8A6 55%,#8B5CF6)" }}
-                      >
-                        <Icon className="w-6 h-6" strokeWidth={1.8} />
-                      </span>
-                      <span className="absolute -top-2 -right-2 z-20 w-6 h-6 rounded-full bg-[#0A0F1E] border border-[#26304A] flex items-center justify-center font-sora text-[11px] font-bold text-[#34D399]">
-                        {i + 1}
-                      </span>
-                    </div>
-                    <div className="text-left">
-                      <h3 className="font-sora font-semibold text-white text-lg mt-0 lg:mt-6 mb-1.5">
-                        {step.title}
-                      </h3>
-                    </div>
-                  </div>
-                  <p className="font-inter text-[#A6B0C9] text-sm leading-relaxed mt-2 lg:pr-4">
-                    {step.description}
-                  </p>
-                </motion.div>
-              );
-            })}
-          </motion.div>
+          <div className="relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-6">
+            {STEPS.map((step, i) => (
+              <StepNode key={step.title} step={step} index={i} progress={scrollYProgress} />
+            ))}
+          </div>
         </div>
       </div>
     </section>

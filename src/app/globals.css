@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  /* Matriarca brand tokens — esmeralda/teal + acento violeta */
+  /* Flujora brand tokens — esmeralda/teal + acento violeta */
   --em-bright: #34D399;
   --em: #10B981;
   --em-deep: #059669;
@@ -40,6 +40,8 @@ html {
   scroll-behavior: auto;
   background: var(--bg);
   color-scheme: dark;
+  /* Fraunces es variable: deja que el eje óptico siga al tamaño de fuente. */
+  font-optical-sizing: auto;
 }
 
 body {
@@ -57,9 +59,10 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display), 'Sora', 'Manrope', sans-serif;
+  font-family: var(--font-display), 'Georgia', 'Cambria', serif;
+  font-optical-sizing: auto;
   text-wrap: balance;
-  letter-spacing: -0.018em;
+  letter-spacing: -0.01em;
 }
 
 p {
@@ -193,17 +196,79 @@ p {
     position: absolute;
     inset: 0;
     background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.55'/></svg>");
-    opacity: 0.04;
-    mix-blend-mode: overlay;
+    opacity: 0.05;
     pointer-events: none;
+  }
+
+  /* ---------- Sistema editorial ---------- */
+  .font-display { font-family: var(--font-display), Georgia, Cambria, serif; }
+  .font-mono { font-family: var(--font-mono), ui-monospace, monospace; }
+
+  /* Itálica editorial (palabra clave del titular) */
+  .display-italic {
+    font-family: var(--font-display), Georgia, serif;
+    font-style: italic;
+    font-optical-sizing: auto;
+  }
+
+  /* Eyebrow / etiqueta técnica en mono */
+  .eyebrow {
+    font-family: var(--font-mono), ui-monospace, monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+  }
+
+  /* Grano fino como capa (usar en un contenedor relative) */
+  .grain {
+    position: relative;
+  }
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.5'/></svg>");
+    background-size: 170px 170px;
+    opacity: 0.045;
+    mix-blend-mode: overlay;
+  }
+
+  /* Desvanecido vertical de los bordes de sección → continuidad sin costuras */
+  .mask-fade-y {
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 7%, #000 93%, transparent 100%);
+            mask-image: linear-gradient(to bottom, transparent 0%, #000 7%, #000 93%, transparent 100%);
+  }
+  .mask-fade-top {
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 10%);
+            mask-image: linear-gradient(to bottom, transparent 0%, #000 10%);
+  }
+
+  /* Línea contenedora para revelado kinético por línea (clip) */
+  .kinetic-line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.06em;
+  }
+
+  /* Texto con gradiente que "respira" (pan animado) — usar con moderación */
+  .text-aurora-pan {
+    background: linear-gradient(120deg, #34D399 0%, #14B8A6 35%, #A78BFA 70%, #34D399 100%);
+    background-size: 220% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradient-pan 9s ease infinite;
   }
 }
 
-/* Línea SVG que se "dibuja" al hacer scroll (HowItWorks) */
+/* Línea SVG que se "dibuja" al hacer scroll (HowItWorks / FlowThread) */
 .svg-line {
   stroke-dasharray: 1000;
   stroke-dashoffset: 1000;
 }
+
 
 ::-webkit-scrollbar {
   width: 8px;
@@ -228,7 +293,7 @@ p {
 }
 
 /* ============================================================
-   Payphone Cajita — overrides visuales (tema Matriarca oscuro).
+   Payphone Cajita — overrides visuales (tema Flujora oscuro).
    Mapeado a las clases reales del bundle v1.1. Solo aplica cuando
    la pasarela está activa; mientras esté desactivada, este bloque
    simplemente no tiene a quién pintar.

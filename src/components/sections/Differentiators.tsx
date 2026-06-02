@@ -2,10 +2,8 @@
 
 import { motion } from "framer-motion";
 import { Feather, Zap, LayoutGrid, Globe, type LucideIcon } from "lucide-react";
-import Reveal from "@/components/ui/Reveal";
-import TiltCard from "@/components/ui/TiltCard";
-import CursorSpotlight from "@/components/ui/CursorSpotlight";
-import { staggerCards, fadeInUp, VIEWPORT_DEFAULT } from "@/lib/animations";
+import KineticHeading from "@/components/ui/KineticHeading";
+import { staggerCards, fadeInUp, VIEWPORT_DEFAULT, EASE_LUX } from "@/lib/animations";
 
 interface Item {
   icon: LucideIcon;
@@ -45,76 +43,101 @@ const ITEMS: Item[] = [
   },
 ];
 
+const rowEnter = {
+  hidden: { opacity: 0, y: 22 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE_LUX } },
+};
+
 export default function Differentiators() {
   return (
-    <section
-      id="diferenciadores"
-      className="relative py-24 sm:py-28 overflow-hidden bg-[#0E1525]"
-    >
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#10B981]/35 to-transparent"
-      />
-
-      <div className="relative max-w-7xl mx-auto px-6">
-        <div className="text-center max-w-2xl mx-auto mb-14 sm:mb-16">
-          <Reveal variant="up">
-            <span className="inline-block text-sm font-semibold tracking-widest uppercase text-[#34D399] mb-4">
-              Por qué Matriarca
-            </span>
-          </Reveal>
-          <Reveal variant="up" delay={0.05}>
-            <h2
-              className="font-sora font-bold text-white mb-4"
-              style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}
-            >
-              Toda la potencia que necesitas,{" "}
-              <span className="text-aurora">nada de lo que estorba</span>
-            </h2>
-          </Reveal>
-          <Reveal variant="up" delay={0.1}>
-            <p className="font-inter text-[#A6B0C9] text-lg leading-relaxed">
-              Diseñado para que el equipo se enfoque en avanzar, no en aprender a usar
-              una herramienta.
-            </p>
-          </Reveal>
+    <section id="diferenciadores" className="relative py-24 sm:py-32 overflow-hidden">
+      <div className="relative max-w-7xl mx-auto px-6 grid lg:grid-cols-[0.85fr_1.15fr] gap-12 lg:gap-16">
+        {/* Intro (sticky en desktop) */}
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <motion.div
+            variants={fadeInUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={VIEWPORT_DEFAULT}
+            className="flex items-center gap-3 mb-5"
+          >
+            <span className="h-px w-9 bg-gradient-to-r from-[#34D399] to-transparent" />
+            <span className="eyebrow text-[#6EE7B7]">Por qué Flujora</span>
+          </motion.div>
+          <KineticHeading
+            as="h2"
+            className="font-display font-semibold text-white"
+            lines={[
+              <span key="l1" style={{ fontSize: "clamp(28px, 3.4vw, 46px)" }}>
+                Toda la potencia,
+              </span>,
+              <span key="l2" style={{ fontSize: "clamp(28px, 3.4vw, 46px)" }}>
+                nada de lo que <span className="display-italic text-aurora">estorba</span>.
+              </span>,
+            ]}
+          />
+          <motion.p
+            variants={fadeInUp}
+            initial="hidden"
+            whileInView="visible"
+            viewport={VIEWPORT_DEFAULT}
+            className="font-inter text-[#A6B0C9] text-lg leading-relaxed mt-5 max-w-md"
+          >
+            Diseñado para que el equipo se enfoque en avanzar, no en aprender a usar
+            una herramienta.
+          </motion.p>
         </div>
 
+        {/* Lista editorial numerada */}
         <motion.div
           variants={staggerCards}
           initial="hidden"
           whileInView="visible"
           viewport={VIEWPORT_DEFAULT}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5"
+          className="flex flex-col"
         >
-          {ITEMS.map((item) => {
+          {ITEMS.map((item, i) => {
             const Icon = item.icon;
             return (
-              <motion.div key={item.title} variants={fadeInUp}>
-                <TiltCard intensity={5} className="h-full">
-                  <CursorSpotlight
-                    className="group h-full rounded-card"
-                    color={`${item.accent}26`}
+              <motion.div
+                key={item.title}
+                variants={rowEnter}
+                className="group relative flex gap-5 sm:gap-7 py-7 border-t border-[#26304A] transition-colors duration-300 hover:border-[#34304A]"
+              >
+                {/* Barra de acento que crece en hover */}
+                <span
+                  aria-hidden
+                  className="absolute left-0 top-0 h-px w-0 transition-[width] duration-500 ease-out group-hover:w-full"
+                  style={{ background: `linear-gradient(90deg, ${item.accent}, transparent)` }}
+                />
+                <div className="shrink-0 pt-1">
+                  <span
+                    className="font-mono text-sm transition-colors duration-300"
+                    style={{ color: `${item.accent}` }}
                   >
-                    <div className="relative h-full rounded-card border border-[#26304A] bg-[#131B2E] p-6 transition-colors duration-300 hover:border-white/15 overflow-hidden">
-                      <span
-                        className="inline-flex w-11 h-11 items-center justify-center rounded-xl mb-5"
-                        style={{ background: `${item.accent}1f`, color: item.accent }}
-                      >
-                        <Icon className="w-5 h-5" strokeWidth={1.8} />
-                      </span>
-                      <h3 className="font-sora font-semibold text-white text-lg mb-2 leading-tight">
-                        {item.title}
-                      </h3>
-                      <p className="font-inter text-[#A6B0C9] text-sm leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
-                  </CursorSpotlight>
-                </TiltCard>
+                    0{i + 1}
+                  </span>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span
+                      className="grid place-items-center w-10 h-10 rounded-xl border transition-transform duration-300 group-hover:-translate-y-0.5"
+                      style={{ borderColor: `${item.accent}40`, background: `${item.accent}14`, color: item.accent }}
+                    >
+                      <Icon className="w-5 h-5" strokeWidth={1.7} />
+                    </span>
+                    <h3 className="font-display font-semibold text-white text-xl leading-tight">
+                      {item.title}
+                    </h3>
+                  </div>
+                  <p className="font-inter text-[#A6B0C9] text-[15px] leading-relaxed sm:pl-[52px]">
+                    {item.description}
+                  </p>
+                </div>
               </motion.div>
             );
           })}
+          <span className="border-t border-[#26304A]" />
         </motion.div>
       </div>
     </section>

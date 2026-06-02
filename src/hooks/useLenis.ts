@@ -31,6 +31,9 @@ export function useLenis() {
       gsap.ticker.lagSmoothing(0);
 
       lenis.on("scroll", ScrollTrigger.update);
+
+      // Tras montar todo (fuentes/imágenes), recalcular posiciones de los triggers.
+      ScrollTrigger.refresh();
     }
 
     init();

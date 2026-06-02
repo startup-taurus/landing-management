@@ -19,7 +19,7 @@ function escapeHtml(s: string): string {
 
 async function sendViaResend(args: SendArgs): Promise<{ ok: boolean; reason?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM || "Matriarca <no-reply@matriarca.app>";
+  const from = process.env.RESEND_FROM || "Flujora <no-reply@flujora.com>";
   if (!apiKey) {
     console.log(`[email] saltado (RESEND_API_KEY vacío) → ${args.to} :: ${args.subject}`);
     return { ok: false, reason: "no-api-key" };
@@ -61,14 +61,14 @@ function shell(title: string, body: string): string {
         <table role="presentation" width="560" cellspacing="0" cellpadding="0" style="max-width:560px;background:#131B2E;border:1px solid #26304A;border-radius:16px;overflow:hidden">
           <tr><td style="height:4px;background:linear-gradient(90deg,${BRAND_COLOR},${ACCENT})"></td></tr>
           <tr><td style="padding:26px 32px;border-bottom:1px solid #26304A">
-            <div style="font-size:20px;font-weight:700;color:${BRAND_COLOR};letter-spacing:-0.01em">Matriarca</div>
+            <div style="font-size:20px;font-weight:700;color:${BRAND_COLOR};letter-spacing:-0.01em">Flujora</div>
           </td></tr>
           <tr><td style="padding:28px 32px">
             <h1 style="margin:0 0 16px;font-size:22px;color:#FFFFFF;font-weight:700">${title}</h1>
             <div style="font-size:15px;line-height:1.6;color:#A6B0C9">${body}</div>
           </td></tr>
           <tr><td style="padding:20px 32px;border-top:1px solid #26304A;font-size:12px;color:#7d889f">
-            Matriarca · gestión de proyectos · Latinoamérica
+            Flujora · gestión de proyectos · Latinoamérica
           </td></tr>
         </table>
       </td></tr>
@@ -87,7 +87,7 @@ function row(label: string, value: string): string {
 export async function sendCustomerReceipt(tx: StoredTransaction): Promise<void> {
   const body = `
     <p>¡Hola ${escapeHtml(tx.lead.name)}! Recibimos tu pago correctamente.</p>
-    <p>En las próximas <strong>24 horas hábiles</strong> te enviaremos tus credenciales de acceso y los pasos para empezar a usar Matriarca.</p>
+    <p>En las próximas <strong>24 horas hábiles</strong> te enviaremos tus credenciales de acceso y los pasos para empezar a usar Flujora.</p>
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:20px 0;border-top:1px solid #26304A">
       ${row("Plan", PLAN_LABEL)}
       ${row("Referencia", tx.clientTransactionId)}
@@ -98,7 +98,7 @@ export async function sendCustomerReceipt(tx: StoredTransaction): Promise<void> 
   `;
   await sendViaResend({
     to: tx.lead.email,
-    subject: "Pago recibido — Matriarca",
+    subject: "Pago recibido — Flujora",
     html: shell("¡Gracias por tu pago!", body),
   });
 }
@@ -128,7 +128,7 @@ export async function sendInternalNotification(tx: StoredTransaction): Promise<v
   `;
   await sendViaResend({
     to: recipients,
-    subject: `Nueva venta Matriarca — ${tx.lead.name}`,
+    subject: `Nueva venta Flujora — ${tx.lead.name}`,
     html: shell("Nueva venta confirmada", body),
   });
 }

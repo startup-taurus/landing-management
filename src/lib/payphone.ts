@@ -26,8 +26,8 @@ export const PLAN_AMOUNT_WITH_TAX = 0; // TODO: base gravada en centavos
 export const PLAN_AMOUNT_WITHOUT_TAX = 0; // TODO: base no gravada en centavos
 export const PLAN_TAX = 0; // TODO: IVA en centavos
 export const PLAN_CURRENCY = "USD";
-export const PLAN_LABEL = "Matriarca — Plan";
-export const PLAN_REFERENCE = "Matriarca - Suscripción";
+export const PLAN_LABEL = "Flujora — Plan";
+export const PLAN_REFERENCE = "Flujora - Suscripción";
 
 export interface LeadInput {
   name: string;
@@ -145,7 +145,7 @@ export async function confirmTransactionWithPayphone(input: {
             "Content-Type": "application/json",
             "Content-Length": Buffer.byteLength(payload),
             Accept: "application/json",
-            "User-Agent": "Matriarca/1.0",
+            "User-Agent": "Flujora/1.0",
           },
           timeout: 20000,
         },

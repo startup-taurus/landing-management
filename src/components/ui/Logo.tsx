@@ -1,8 +1,8 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Marca de Matriarca: cuadrado redondeado con gradiente esmeralda→teal→violeta
- * y un glifo de "columnas" (tablero) que también evoca una "M". Sin assets
+ * Marca de Flujora: cuadrado redondeado con gradiente esmeralda→teal→violeta
+ * y un glifo de "columnas" (tablero) que evoca el flujo de tareas. Sin assets
  * externos: todo es SVG inline.
  */
 export function LogoMark({ className }: { className?: string }) {
@@ -41,8 +41,8 @@ export default function Logo({
     <span className={cn("inline-flex items-center gap-2.5 select-none", className)}>
       <LogoMark className={markClassName} />
       {withWordmark && (
-        <span className="font-sora font-bold text-white text-xl leading-none tracking-tight">
-          Matriarca
+        <span className="font-display font-semibold text-white text-xl leading-none tracking-tight">
+          Flujora
         </span>
       )}
     </span>

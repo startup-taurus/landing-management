@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Sora, Inter } from "next/font/google";
+import { Fraunces, Inter, IBM_Plex_Mono } from "next/font/google";
 import StructuredData from "@/components/seo/StructuredData";
 import {
   SITE_DESCRIPTION,
@@ -12,13 +12,15 @@ import {
 } from "@/lib/seo";
 import "./globals.css";
 
-// Tipografía vía next/font/google (sin binarios licenciados en el repo):
-//   Sora  = titulares / display
-//   Inter = cuerpo / interfaz
+// Sistema tipográfico editorial vía next/font/google (auto-hospedado, subset latin):
+//   Fraunces      = display / titulares (serif variable con eje óptico → "lujo editorial")
+//   Inter         = cuerpo / interfaz
+//   IBM Plex Mono = etiquetas técnicas, índices, precios
 // Se exponen como CSS vars y Tailwind las mapea (ver tailwind.config.ts).
-const sora = Sora({
+const fraunces = Fraunces({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  style: ["normal", "italic"],
+  axes: ["opsz", "SOFT"],
   variable: "--font-display",
   display: "swap",
 });
@@ -27,6 +29,13 @@ const inter = Inter({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-body",
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -103,7 +112,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="es"
-      className={`dark ${sora.variable} ${inter.variable}`}
+      className={`dark ${fraunces.variable} ${inter.variable} ${plexMono.variable}`}
       data-theme="dark"
     >
       <body>

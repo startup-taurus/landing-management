@@ -27,24 +27,15 @@ const legalLinks = [
 export default function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className="relative bg-gradient-to-br from-[#0A0F1E] via-[#0E1525] to-[#131B2E] text-white pt-16 pb-10 overflow-hidden">
-      <div
-        aria-hidden
-        className="absolute -top-32 -right-32 w-[480px] h-[480px] rounded-full bg-[#10B981]/10 blur-3xl pointer-events-none"
-      />
-      <div
-        aria-hidden
-        className="absolute -bottom-32 -left-32 w-[420px] h-[420px] rounded-full bg-[#8B5CF6]/12 blur-3xl pointer-events-none"
-      />
-
+    <footer className="relative border-t border-[#26304A]/60 bg-[#0A0F1E]/40 text-white pt-16 pb-10 overflow-hidden">
       <div className="relative max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
           <div className="md:col-span-5">
             <Logo className="mb-4" markClassName="h-10 w-10" />
             <p className="text-white/65 text-sm font-inter leading-relaxed max-w-sm mb-6">
-              Gestión de proyectos simple para equipos. Reúne tareas, tableros,
-              calendario y cronograma en un solo lugar — sin la complejidad de las
-              herramientas pesadas.
+              Flujora es la gestión de proyectos simple para equipos. Reúne tareas,
+              tableros, calendario y cronograma en un solo lugar — sin la complejidad
+              de las herramientas pesadas.
             </p>
             <div className="flex flex-wrap gap-3">
               <a
@@ -68,7 +59,7 @@ export default function Footer() {
           </div>
 
           <div className="md:col-span-3 md:col-start-7">
-            <p className="font-sora font-semibold text-sm mb-4 text-white/85">Producto</p>
+            <p className="font-display font-semibold text-sm mb-4 text-white/85">Producto</p>
             <ul className="space-y-2.5 text-sm font-inter text-white/60">
               {productLinks.map((l) => (
                 <li key={l.href}>
@@ -81,7 +72,7 @@ export default function Footer() {
           </div>
 
           <div className="md:col-span-2">
-            <p className="font-sora font-semibold text-sm mb-4 text-white/85">Recursos</p>
+            <p className="font-display font-semibold text-sm mb-4 text-white/85">Recursos</p>
             <ul className="space-y-2.5 text-sm font-inter text-white/60">
               {resourceLinks.map((l) => (
                 <li key={l.href}>
@@ -94,7 +85,7 @@ export default function Footer() {
           </div>
 
           <div className="md:col-span-2">
-            <p className="font-sora font-semibold text-sm mb-4 text-white/85">Legal</p>
+            <p className="font-display font-semibold text-sm mb-4 text-white/85">Legal</p>
             <ul className="space-y-2.5 text-sm font-inter text-white/60">
               {legalLinks.map((l) => (
                 <li key={l.label}>
@@ -108,7 +99,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-14 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm font-inter text-white/45">
-          <p>© {year} Matriarca. Todos los derechos reservados.</p>
+          <p>© {year} Flujora. Todos los derechos reservados.</p>
           <p className="flex items-center gap-2">
             <span>Hecho en Latinoamérica</span>
           </p>

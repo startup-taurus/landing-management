@@ -10,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Matriarca brand tokens — base esmeralda/teal + acento violeta, tema oscuro.
+        // Flujora brand tokens — base esmeralda/teal + acento violeta, tema oscuro.
         emerald: {
           DEFAULT: "#10B981",
           bright: "#34D399",
@@ -53,13 +53,15 @@ const config: Config = {
         },
       },
       fontFamily: {
-        // Tipografía vía next/font/google (ver layout.tsx). Se conservan los nombres
-        // de clase (font-sora / font-inter) para no tocar cada componente:
-        //   display (titulares) -> Sora
+        // Tipografía editorial vía next/font/google (ver layout.tsx). Se conservan los
+        // alias (font-sora / font-inter) para no romper componentes existentes:
+        //   display (titulares) -> Fraunces (serif variable)
         //   body (cuerpo/UI)    -> Inter
-        display: ["var(--font-display)", "Sora", "Manrope", "sans-serif"],
+        //   mono (etiquetas)    -> IBM Plex Mono
+        display: ["var(--font-display)", "Georgia", "Cambria", "serif"],
         body: ["var(--font-body)", "Inter", "system-ui", "sans-serif"],
-        sora: ["var(--font-display)", "Sora", "Manrope", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
+        sora: ["var(--font-display)", "Georgia", "Cambria", "serif"],
         inter: ["var(--font-body)", "Inter", "system-ui", "sans-serif"],
       },
       borderRadius: {
@@ -99,11 +101,41 @@ const config: Config = {
           "0%, 100%": { backgroundPosition: "0% 50%" },
           "50%": { backgroundPosition: "100% 50%" },
         },
+        // Deriva lenta de la aurora a nivel página (PageAtmosphere). Solo transform
+        // (compositor GPU) para no recalcular el blur en cada frame.
+        "aurora-pan": {
+          "0%, 100%": { transform: "translate3d(0,0,0) scale(1)" },
+          "50%": { transform: "translate3d(2%,-3%,0) scale(1.07)" },
+        },
+        // Pulso de los nodos del hilo de flujo / detalles vivos.
+        "pulse-node": {
+          "0%, 100%": { transform: "scale(1)", opacity: "0.55" },
+          "50%": { transform: "scale(1.35)", opacity: "1" },
+        },
+        // Parpadeo de cursor de texto (tarjeta "Documentos").
+        caret: {
+          "0%, 49%": { opacity: "1" },
+          "50%, 100%": { opacity: "0" },
+        },
+        // Recorrido de un pulso por un conector (tarjeta "Automatizaciones").
+        "flow-dash": {
+          to: { strokeDashoffset: "-24" },
+        },
+        // Marquesina sutil para tiras de logos / sellos.
+        marquee: {
+          from: { transform: "translateX(0)" },
+          to: { transform: "translateX(-50%)" },
+        },
       },
       animation: {
         "blob-drift": "blob-drift 18s ease-in-out infinite",
         shimmer: "shimmer 2.4s linear infinite",
         "gradient-pan": "gradient-pan 8s ease infinite",
+        "aurora-pan": "aurora-pan 22s ease-in-out infinite",
+        "pulse-node": "pulse-node 2.6s ease-in-out infinite",
+        caret: "caret 1.1s step-end infinite",
+        "flow-dash": "flow-dash 0.9s linear infinite",
+        marquee: "marquee 32s linear infinite",
       },
     },
   },

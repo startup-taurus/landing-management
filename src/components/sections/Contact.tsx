@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useState, type FormEvent } from "react";
 import { Mail, MapPin, MessageCircle, Send, CheckCircle2, ArrowUpRight } from "lucide-react";
 import Button from "@/components/ui/Button";
+import KineticHeading from "@/components/ui/KineticHeading";
 import { fadeInLeft, fadeInRight, VIEWPORT_DEFAULT } from "@/lib/animations";
 import {
   CONTACT_EMAIL,
@@ -58,20 +59,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contacto" className="relative py-24 sm:py-28 overflow-hidden bg-[#0E1525]">
-      <div
-        aria-hidden
-        className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#10B981]/35 to-transparent"
-      />
-      <div
-        aria-hidden
-        className="absolute -top-40 -right-40 w-[480px] h-[480px] rounded-full bg-[#10B981]/8 blur-3xl pointer-events-none"
-      />
-      <div
-        aria-hidden
-        className="absolute -bottom-40 -left-40 w-[420px] h-[420px] rounded-full bg-[#8B5CF6]/8 blur-3xl pointer-events-none"
-      />
-
+    <section id="contacto" className="relative py-24 sm:py-32 overflow-hidden">
       <div className="relative max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <motion.div
@@ -80,13 +68,22 @@ export default function Contact() {
             whileInView="visible"
             viewport={VIEWPORT_DEFAULT}
           >
-            <span className="inline-block text-sm font-semibold tracking-widest uppercase text-[#34D399] mb-4">
-              Contacto
-            </span>
-            <h2 className="font-sora font-bold text-white mb-5" style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}>
-              ¿Listo para organizar a tu equipo con{" "}
-              <span className="text-aurora">claridad</span>?
-            </h2>
+            <div className="flex items-center gap-3 mb-5">
+              <span className="h-px w-9 bg-gradient-to-r from-[#34D399] to-transparent" />
+              <span className="eyebrow text-[#6EE7B7]">Contacto</span>
+            </div>
+            <KineticHeading
+              as="h2"
+              className="font-display font-semibold text-white mb-5"
+              lines={[
+                <span key="l1" style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}>
+                  ¿Listo para organizar a tu
+                </span>,
+                <span key="l2" style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }}>
+                  equipo con <span className="display-italic text-aurora">claridad</span>?
+                </span>,
+              ]}
+            />
             <p className="font-inter text-[#A6B0C9] text-lg leading-relaxed mb-8">
               Cuéntanos sobre tu equipo y te respondemos por WhatsApp con una demo y
               los próximos pasos. Sin compromisos.
@@ -137,7 +134,7 @@ export default function Contact() {
                 boxShadow: "0 24px 80px -16px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.04)",
               }}
             >
-              <h3 className="font-sora font-semibold text-white text-xl mb-1">Solicitar una demo</h3>
+              <h3 className="font-display font-semibold text-white text-xl mb-1">Solicitar una demo</h3>
               <p className="font-inter text-[#A6B0C9]/70 text-sm mb-6">
                 Te respondemos por WhatsApp en menos de 24h
               </p>
@@ -151,7 +148,7 @@ export default function Contact() {
                 <Field label="Teléfono" type="tel" placeholder="+593 99 592 3599" value={form.phone} onChange={(v) => update("phone", v)} />
                 <FieldArea label="Mensaje" placeholder="Cuéntanos sobre tu equipo y tus proyectos..." value={form.message} onChange={(v) => update("message", v)} />
 
-                <Button size="lg" className="w-full justify-center" disabled={sent}>
+                <Button size="lg" className="w-full justify-center" disabled={sent} data-cursor="cta">
                   {sent ? (
                     <>
                       <CheckCircle2 className="w-4 h-4" />
@@ -237,7 +234,7 @@ function ContactRow({
           aria-hidden
           className="hidden sm:block flex-1 h-px self-center bg-[length:6px_1px] bg-repeat-x bg-[linear-gradient(to_right,#26304A_50%,transparent_50%)] transition-all duration-300 group-hover:bg-[linear-gradient(to_right,var(--accent),var(--accent))]"
         />
-        <span className="font-sora font-semibold text-white text-[15px] sm:text-base truncate">
+        <span className="font-display font-semibold text-white text-[15px] sm:text-base truncate">
           {value}
         </span>
       </div>
