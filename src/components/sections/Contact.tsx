@@ -145,7 +145,7 @@ export default function Contact() {
                   <Field label="Empresa / equipo" type="text" placeholder="Nombre del equipo" value={form.company} onChange={(v) => update("company", v)} />
                 </div>
                 <Field label="Email" type="email" placeholder="tu@email.com" value={form.email} onChange={(v) => update("email", v)} required />
-                <Field label="Teléfono" type="tel" placeholder="+593 99 592 3599" value={form.phone} onChange={(v) => update("phone", v)} />
+                <Field label="Teléfono" type="tel" placeholder="+593 96 276 6008" value={form.phone} onChange={(v) => update("phone", v)} />
                 <FieldArea label="Mensaje" placeholder="Cuéntanos sobre tu equipo y tus proyectos..." value={form.message} onChange={(v) => update("message", v)} />
 
                 <Button size="lg" className="w-full justify-center" disabled={sent} data-cursor="cta">

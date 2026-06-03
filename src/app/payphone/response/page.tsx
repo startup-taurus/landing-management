@@ -88,8 +88,9 @@ function PaymentResult() {
           ¡Pago recibido!
         </h1>
         <p className="font-inter text-[#A6B0C9] text-center mb-6">
-          Gracias por confiar en Flujora. En las próximas 24 horas hábiles te
-          enviaremos tus credenciales y los pasos de acceso al correo registrado.
+          ¡Gracias por confiar en Flujora! Ya estamos configurando tu entorno.
+          Muy pronto enviaremos tus credenciales y los pasos de acceso al correo
+          que registraste.
         </p>
 
         <div className="rounded-card border border-[#26304A] bg-[#0E1525]/70 p-5 mb-6 space-y-2">

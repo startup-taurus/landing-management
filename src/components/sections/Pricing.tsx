@@ -107,24 +107,6 @@ const TIERS: Tier[] = [
   },
 ];
 
-// Plan de PRUEBA ($1) visible en la grilla. La compra NO tiene validez.
-const TEST_TIER: Tier = {
-  id: "test",
-  name: "Prueba $1",
-  tagline: "Plan de prueba — esta compra NO tiene validez",
-  users: "Solo para testeo",
-  monthly: 1,
-  annual: 1,
-  ai: "—",
-  features: [
-    "Cobro real de $1, únicamente para pruebas",
-    "⚠️ La transacción NO tiene validez ni otorga ningún servicio",
-    "No comprar: es un plan de testeo interno",
-  ],
-  cta: "Probar pago $1",
-  payable: true,
-};
-
 function priceFor(tier: Tier, billing: Billing): number | null {
   return billing === "monthly" ? tier.monthly : tier.annual;
 }
@@ -155,10 +137,6 @@ interface InitResult {
 export default function Pricing() {
   const [billing, setBilling] = useState<Billing>("monthly");
   const [checkoutTier, setCheckoutTier] = useState<Tier | null>(null);
-
-  // Plan de prueba ($1) visible para todos. Es solo para testear el cobro real;
-  // la compra NO tiene validez (ver TEST_TIER). Quitar cuando ya no se use.
-  const tiers = [...TIERS, TEST_TIER];
 
   return (
     <section id="planes" className="relative py-24 sm:py-32 overflow-hidden">
@@ -220,7 +198,7 @@ export default function Pricing() {
             viewport={VIEWPORT_DEFAULT}
             className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 items-stretch"
           >
-            {tiers.map((tier) => (
+            {TIERS.map((tier) => (
               <PlanCard
                 key={tier.id}
                 tier={tier}

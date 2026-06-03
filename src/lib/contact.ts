@@ -1,8 +1,8 @@
 // NOTA: número y correo de contacto son PLACEHOLDERS editables.
 // Cámbialos por los reales de Flujora cuando los tengas.
-export const WHATSAPP_NUMBER = "593995923599";
+export const WHATSAPP_NUMBER = "593962766008";
 
-export const WHATSAPP_DISPLAY = "+593 99 592 3599";
+export const WHATSAPP_DISPLAY = "+593 96 276 6008";
 
 const DEFAULT_WHATSAPP_MESSAGE =
   "Hola, me interesa conocer más sobre Flujora para gestionar los proyectos de mi equipo.";
@@ -13,7 +13,7 @@ export function whatsappUrl(message: string = DEFAULT_WHATSAPP_MESSAGE) {
 
 export const WHATSAPP_URL = whatsappUrl();
 
-export const CONTACT_EMAIL = "ridencedenods@gmail.com";
+export const CONTACT_EMAIL = "fabriciozavala13@gmail.com";
 
 export const CONTACT_EMAIL_HREF = `mailto:${CONTACT_EMAIL}`;
 
