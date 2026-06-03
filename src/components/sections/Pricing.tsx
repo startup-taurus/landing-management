@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from "framer-motion";
-import { useState, type FormEvent } from "react";
+import { useState, useEffect, type FormEvent } from "react";
 import {
   Check,
   Lock,
@@ -107,6 +107,24 @@ const TIERS: Tier[] = [
   },
 ];
 
+// Plan de PRUEBA ($1) visible en la grilla. La compra NO tiene validez.
+const TEST_TIER: Tier = {
+  id: "test",
+  name: "Prueba $1",
+  tagline: "Plan de prueba — esta compra NO tiene validez",
+  users: "Solo para testeo",
+  monthly: 1,
+  annual: 1,
+  ai: "—",
+  features: [
+    "Cobro real de $1, únicamente para pruebas",
+    "⚠️ La transacción NO tiene validez ni otorga ningún servicio",
+    "No comprar: es un plan de testeo interno",
+  ],
+  cta: "Probar pago $1",
+  payable: true,
+};
+
 function priceFor(tier: Tier, billing: Billing): number | null {
   return billing === "monthly" ? tier.monthly : tier.annual;
 }
@@ -121,7 +139,7 @@ interface LeadForm {
 }
 const INITIAL: LeadForm = { name: "", email: "", phone: "" };
 
-type Stage = "form" | "loading" | "pay" | "error";
+type Stage = "form" | "pay";
 
 interface InitResult {
   clientTransactionId: string;
@@ -137,6 +155,10 @@ interface InitResult {
 export default function Pricing() {
   const [billing, setBilling] = useState<Billing>("monthly");
   const [checkoutTier, setCheckoutTier] = useState<Tier | null>(null);
+
+  // Plan de prueba ($1) visible para todos. Es solo para testear el cobro real;
+  // la compra NO tiene validez (ver TEST_TIER). Quitar cuando ya no se use.
+  const tiers = [...TIERS, TEST_TIER];
 
   return (
     <section id="planes" className="relative py-24 sm:py-32 overflow-hidden">
@@ -198,7 +220,7 @@ export default function Pricing() {
             viewport={VIEWPORT_DEFAULT}
             className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 items-stretch"
           >
-            {TIERS.map((tier) => (
+            {tiers.map((tier) => (
               <PlanCard
                 key={tier.id}
                 tier={tier}
@@ -404,54 +426,14 @@ function PlanCTA({ tier, onChoose, featured }: { tier: Tier; onChoose: () => voi
 function CheckoutCard({ tier, billing, onBack }: { tier: Tier; billing: Billing; onBack: () => void }) {
   const [form, setForm] = useState<LeadForm>(INITIAL);
   const [stage, setStage] = useState<Stage>("form");
-  const [errorMsg, setErrorMsg] = useState<string>("");
-  const [initData, setInitData] = useState<InitResult | null>(null);
 
   function update<K extends keyof LeadForm>(key: K, value: LeadForm[K]) {
     setForm((s) => ({ ...s, [key]: value }));
   }
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setErrorMsg("");
-    setStage("loading");
-    try {
-      const res = await fetch("/api/payphone/init", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, planId: tier.id, billing }),
-      });
-      const data = (await res.json()) as Partial<InitResult> & { error?: string };
-      if (
-        !res.ok ||
-        !data.clientTransactionId ||
-        !data.phone ||
-        !data.email ||
-        typeof data.amount !== "number"
-      ) {
-        throw new Error(data.error || "No pudimos iniciar el pago.");
-      }
-      setInitData({
-        clientTransactionId: data.clientTransactionId,
-        phone: data.phone,
-        email: data.email,
-        amount: data.amount,
-        amountWithTax: data.amountWithTax ?? 0,
-        amountWithoutTax: data.amountWithoutTax ?? 0,
-        tax: data.tax ?? 0,
-        reference: data.reference ?? "",
-      });
-      setStage("pay");
-    } catch (err) {
-      setErrorMsg((err as Error).message);
-      setStage("error");
-    }
-  }
-
-  function resetForm() {
-    setStage("form");
-    setErrorMsg("");
-    setInitData(null);
+    setStage("pay");
   }
 
   return (
@@ -473,25 +455,14 @@ function CheckoutCard({ tier, billing, onBack }: { tier: Tier; billing: Billing;
         <div className="p-7 sm:p-9 bg-[#0A0F1E]/40 border-t lg:border-t-0 lg:border-l border-[#26304A]">
           {stage === "form" && <FormStage form={form} update={update} onSubmit={handleSubmit} />}
 
-          {stage === "loading" && (
-            <div className="flex flex-col items-center justify-center text-center py-20">
-              <Loader2 className="w-10 h-10 text-[#34D399] animate-spin mb-4" />
-              <p className="font-inter text-[#A6B0C9]">Preparando tu pago seguro…</p>
-            </div>
-          )}
-
-          {stage === "pay" && initData && (
+          {stage === "pay" && (
             <PayStage
-              init={initData}
-              onError={(msg) => {
-                setErrorMsg(msg);
-                setStage("error");
-              }}
-              onBack={resetForm}
+              lead={form}
+              planId={tier.id}
+              billing={billing}
+              onBackToForm={() => setStage("form")}
             />
           )}
-
-          {stage === "error" && <ErrorStage message={errorMsg} onRetry={resetForm} />}
         </div>
       </div>
 
@@ -506,7 +477,7 @@ function CheckoutHeader({ stage }: { stage: Stage }) {
     { id: "pay", label: "Pago" },
     { id: "done", label: "Confirmación" },
   ];
-  const activeIndex = stage === "form" ? 0 : stage === "loading" || stage === "pay" || stage === "error" ? 1 : 2;
+  const activeIndex = stage === "form" ? 0 : 1;
 
   return (
     <div className="px-7 sm:px-9 py-5 border-b border-[#26304A] flex items-center justify-between gap-4 bg-[#0E1525]/60">
@@ -681,19 +652,86 @@ function FormStage({
 }
 
 function PayStage({
-  init,
-  onError,
-  onBack,
+  lead,
+  planId,
+  billing,
+  onBackToForm,
 }: {
-  init: InitResult;
-  onError: (m: string) => void;
-  onBack: () => void;
+  lead: LeadForm;
+  planId: string;
+  billing: Billing;
+  onBackToForm: () => void;
 }) {
+  // CLAVE DEL FIX: cada intento de pago pide un clientTransactionId NUEVO a /init.
+  // Reusar el mismo id en un segundo "Pagar" (tarjeta rechazada, doble clic o
+  // volver atrás) hace que Payphone responda:
+  //   "Ya existe una transacción con el ClientTransactionId especificado".
+  // Por eso `attempt` está en las deps del efecto y la Cajita usa key={id}.
+  const [attempt, setAttempt] = useState(0);
+  const [init, setInit] = useState<InitResult | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setErrorMsg("");
+    setInit(null);
+    (async () => {
+      try {
+        const res = await fetch("/api/payphone/init", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: lead.name,
+            email: lead.email,
+            phone: lead.phone,
+            planId,
+            billing,
+          }),
+        });
+        const data = (await res.json()) as Partial<InitResult> & { error?: string };
+        if (
+          !res.ok ||
+          !data.clientTransactionId ||
+          !data.phone ||
+          !data.email ||
+          typeof data.amount !== "number"
+        ) {
+          throw new Error(data.error || "No pudimos iniciar el pago.");
+        }
+        if (cancelled) return;
+        setInit({
+          clientTransactionId: data.clientTransactionId,
+          phone: data.phone,
+          email: data.email,
+          amount: data.amount,
+          amountWithTax: data.amountWithTax ?? 0,
+          amountWithoutTax: data.amountWithoutTax ?? 0,
+          tax: data.tax ?? 0,
+          reference: data.reference ?? "",
+        });
+        setLoading(false);
+      } catch (err) {
+        if (cancelled) return;
+        setErrorMsg((err as Error).message || "No pudimos iniciar el pago.");
+        setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [attempt, planId, billing, lead.name, lead.email, lead.phone]);
+
+  function retry() {
+    setAttempt((a) => a + 1);
+  }
+
   return (
     <div>
       <button
         type="button"
-        onClick={onBack}
+        onClick={onBackToForm}
         className="inline-flex items-center gap-1.5 font-inter text-sm text-[#A6B0C9]/70 hover:text-white transition-colors mb-5"
       >
         <ArrowLeft className="w-3.5 h-3.5" /> Volver a editar mis datos
@@ -704,28 +742,57 @@ function PayStage({
         Completa los datos de tu tarjeta en la pasarela cifrada de Payphone.
       </p>
 
-      <div className="rounded-xl border border-[#26304A] bg-[#0E1525]/60 p-4 sm:p-5 mb-4">
-        <PayphoneBox
-          clientTransactionId={init.clientTransactionId}
-          email={init.email}
-          phone={init.phone}
-          amount={init.amount}
-          amountWithTax={init.amountWithTax}
-          amountWithoutTax={init.amountWithoutTax}
-          tax={init.tax}
-          reference={init.reference}
-          onError={onError}
-        />
-      </div>
+      {loading && (
+        <div className="flex flex-col items-center justify-center text-center py-16">
+          <Loader2 className="w-10 h-10 text-[#34D399] animate-spin mb-4" />
+          <p className="font-inter text-[#A6B0C9]">Preparando tu pago seguro…</p>
+        </div>
+      )}
 
-      <div className="flex items-center justify-between gap-3 px-1">
-        <span className="inline-flex items-center gap-1.5 font-inter text-[11px] text-[#A6B0C9]/55">
-          <Lock className="w-3 h-3" /> Conexión cifrada extremo a extremo
-        </span>
-        <span className="font-mono text-[10px] text-[#A6B0C9]/45">
-          Ref: {init.clientTransactionId.slice(4, 22)}
-        </span>
-      </div>
+      {!loading && errorMsg && <ErrorStage message={errorMsg} onRetry={retry} />}
+
+      {!loading && !errorMsg && init && (
+        <>
+          <div className="rounded-xl border border-[#26304A] bg-[#0E1525]/60 p-4 sm:p-5 mb-4">
+            <PayphoneBox
+              key={init.clientTransactionId}
+              clientTransactionId={init.clientTransactionId}
+              email={init.email}
+              phone={init.phone}
+              amount={init.amount}
+              amountWithTax={init.amountWithTax}
+              amountWithoutTax={init.amountWithoutTax}
+              tax={init.tax}
+              reference={init.reference}
+              onError={(msg) => setErrorMsg(msg)}
+            />
+          </div>
+
+          {/* Reintento explícito con id NUEVO. Evita el doble "Pagar" sobre el
+              mismo id, que es lo que dispara el error de Payphone. */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-lg border border-[#26304A] bg-[#0E1525]/40 px-4 py-3 mb-4">
+            <span className="font-inter text-[12px] text-[#A6B0C9]/70">
+              ¿Tu pago fue rechazado o no se completó?
+            </span>
+            <button
+              type="button"
+              onClick={retry}
+              className="inline-flex items-center justify-center gap-1.5 font-inter text-[13px] font-semibold text-[#34D399] hover:text-white transition-colors"
+            >
+              Intentar de nuevo
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between gap-3 px-1">
+            <span className="inline-flex items-center gap-1.5 font-inter text-[11px] text-[#A6B0C9]/55">
+              <Lock className="w-3 h-3" /> Conexión cifrada extremo a extremo
+            </span>
+            <span className="font-mono text-[10px] text-[#A6B0C9]/45">
+              Ref: {init.clientTransactionId.slice(4, 22)}
+            </span>
+          </div>
+        </>
+      )}
     </div>
   );
 }

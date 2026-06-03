@@ -37,6 +37,9 @@ export type Billing = "monthly" | "annual";
 export const PLAN_CATALOG: Record<string, { label: string; monthly: number; annual: number }> = {
   base: { label: "Equipo Base", monthly: 9990, annual: 95880 },
   pro: { label: "Equipo Pro", monthly: 19980, annual: 191760 },
+  // Plan de PRUEBA ($1) — valida el flujo real con una tarjeta real antes de publicar.
+  // En la UI solo es visible con ?test=1. Puedes borrar esta línea cuando termines.
+  test: { label: "Prueba", monthly: 100, annual: 100 },
 };
 
 export interface AmountBreakdown {
